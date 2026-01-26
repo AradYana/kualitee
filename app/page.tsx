@@ -348,8 +348,24 @@ export default function Home() {
     addTerminalEntry('');
   }, [currentPhase, sourceData, targetData, evaluationResults, mergedData, kpis, setPhase, addTerminalEntry, addLog, updateEvaluationResult]);
 
+  const handleReset = () => {
+    useAppStore.getState().clearData();
+    useAppStore.getState().clearTerminal();
+    setPhase('UPLOAD');
+    setShowFailuresOnly(false);
+  };
+
   return (
-    <div className="min-h-screen p-4 max-w-6xl mx-auto">
+    <div className="min-h-screen p-4 max-w-6xl mx-auto relative">
+      {/* Reset Button - Top Right */}
+      <button
+        onClick={handleReset}
+        className="absolute top-4 right-4 dos-button text-xs"
+        title="Reset and start over"
+      >
+        [ RESET ]
+      </button>
+
       <ASCIIHeader />
 
       {/* Error Screen Overlay */}

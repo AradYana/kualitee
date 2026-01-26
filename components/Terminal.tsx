@@ -9,7 +9,7 @@ interface TerminalProps {
 
 export default function Terminal({ onCommand }: TerminalProps) {
   const [input, setInput] = useState('');
-  const { terminalHistory, addTerminalEntry, systemLogs } = useAppStore();
+  const { terminalHistory, addTerminalEntry } = useAppStore();
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -17,7 +17,7 @@ export default function Terminal({ onCommand }: TerminalProps) {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
-  }, [terminalHistory, systemLogs]);
+  }, [terminalHistory]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,19 +50,6 @@ export default function Terminal({ onCommand }: TerminalProps) {
     }
   };
 
-  const getLogColor = (type: string) => {
-    switch (type) {
-      case 'ERROR':
-        return 'text-error-red';
-      case 'WARNING':
-        return 'text-warning-amber';
-      case 'SUCCESS':
-        return 'text-matrix-green';
-      default:
-        return 'text-matrix-green/70';
-    }
-  };
-
   return (
     <div className="border border-matrix-green bg-black/50">
       {/* Terminal Header */}
@@ -84,19 +71,10 @@ export default function Terminal({ onCommand }: TerminalProps) {
         <div className="text-matrix-green/60 mb-2">
           KUALITEE COMMAND INTERFACE INITIALIZED
           <br />
-          SESSION STARTED: {new Date().toISOString()}
-          <br />
           ─────────────────────────────────────────
         </div>
 
-        {/* System logs */}
-        {systemLogs.map((log, index) => (
-          <div key={`log-${index}`} className={`${getLogColor(log.type)} text-xs`}>
-            [{log.timestamp.split('T')[1]?.slice(0, 8)}] [{log.type}] {log.message}
-          </div>
-        ))}
-
-        {/* Terminal history */}
+        {/* Terminal history (user commands and responses only) */}
         {terminalHistory.map((entry, index) => (
           <div key={`history-${index}`} className="text-matrix-green">
             {entry}
