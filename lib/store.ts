@@ -65,6 +65,12 @@ export const useAppStore = create<AppStore>((set, get) => ({
     evaluationResults: null,
     evaluationSummary: null,
     dataMismatchLog: [],
+    kpis: [
+      { id: 1, name: '', description: '', shortName: '' },
+      { id: 2, name: '', description: '', shortName: '' },
+      { id: 3, name: '', description: '', shortName: '' },
+      { id: 4, name: '', description: '', shortName: '' },
+    ],
   }),
 
   // KPI actions
