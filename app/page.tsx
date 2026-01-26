@@ -35,11 +35,10 @@ export default function Home() {
     setEvaluationSummary,
     evaluationResults,
     addTerminalEntry,
-    updateKPI,
-    updateEvaluationResult,
   } = useAppStore();
 
   const [showFailuresOnly, setShowFailuresOnly] = useState(false);
+  const [isTerminalProcessing, setIsTerminalProcessing] = useState(false);
 
   // Validate and merge data
   const validateAndMergeData = useCallback(() => {
@@ -197,156 +196,47 @@ export default function Home() {
     addLog('INFO', 'Ready for terminal commands. Type "help" for options.');
   }, [mergedData, kpis, setPhase, setLoading, addLog, setEvaluationResults, setEvaluationSummary]);
 
-  // Handle terminal commands
-  const handleTerminalCommand = useCallback(async (command: string) => {
-    const cmd = command.toLowerCase().trim();
-
-    if (cmd === 'help') {
+  // Handle terminal query (free text to LLM)
+  const handleTerminalQuery = useCallback(async (query: string) => {
+    if (!evaluationResults || evaluationResults.length === 0) {
       addTerminalEntry('');
-      addTerminalEntry('AVAILABLE COMMANDS:');
-      addTerminalEntry('───────────────────────────────────────');
-      addTerminalEntry('  help                    - Show this help message');
-      addTerminalEntry('  status                  - Show current system status');
-      addTerminalEntry('  drill down on failures  - Filter to show only scores < 3');
-      addTerminalEntry('  show all                - Show all results');
-      addTerminalEntry('  re-configure kpi [N]    - Update KPI N configuration');
-      addTerminalEntry('  re-evaluate msid [X]    - Re-evaluate specific MSID');
-      addTerminalEntry('  clear                   - Clear terminal history');
-      addTerminalEntry('  restart                 - Reset and start over');
+      addTerminalEntry('ERROR: No evaluation results available.');
       addTerminalEntry('');
       return;
     }
 
-    if (cmd === 'status') {
-      addTerminalEntry('');
-      addTerminalEntry(`PHASE: ${currentPhase}`);
-      addTerminalEntry(`SOURCE RECORDS: ${sourceData?.length || 0}`);
-      addTerminalEntry(`TARGET RECORDS: ${targetData?.length || 0}`);
-      addTerminalEntry(`EVALUATED: ${evaluationResults?.length || 0}`);
-      addTerminalEntry('');
-      return;
-    }
+    setIsTerminalProcessing(true);
 
-    if (cmd === 'drill down on failures' || cmd === 'show failures') {
-      setShowFailuresOnly(true);
-      addTerminalEntry('');
-      addTerminalEntry('FILTER APPLIED: Showing records with scores < 3');
-      addTerminalEntry('');
-      return;
-    }
+    try {
+      const response = await fetch('/api/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query,
+          evaluationResults,
+          kpis,
+          mergedData,
+        }),
+      });
 
-    if (cmd === 'show all') {
-      setShowFailuresOnly(false);
-      addTerminalEntry('');
-      addTerminalEntry('FILTER REMOVED: Showing all records');
-      addTerminalEntry('');
-      return;
-    }
-
-    if (cmd === 'clear') {
-      useAppStore.getState().clearTerminal();
-      return;
-    }
-
-    if (cmd === 'restart') {
-      useAppStore.getState().clearData();
-      setPhase('UPLOAD');
-      addTerminalEntry('');
-      addTerminalEntry('SYSTEM RESET. Ready for new data upload.');
-      addTerminalEntry('');
-      return;
-    }
-
-    // Re-configure KPI
-    const reconfigMatch = cmd.match(/re-?configure\s+kpi\s+(\d+)/i);
-    if (reconfigMatch) {
-      const kpiId = parseInt(reconfigMatch[1]);
-      if (kpiId >= 1 && kpiId <= 4) {
+      if (response.ok) {
+        const data = await response.json();
         addTerminalEntry('');
-        addTerminalEntry(`Enter new description for KPI ${kpiId}:`);
-        addTerminalEntry('(Feature: Use the KPI config panel to update)');
+        addTerminalEntry(data.response);
         addTerminalEntry('');
-        // In a full implementation, this would open a modal or inline editor
       } else {
         addTerminalEntry('');
-        addTerminalEntry('ERROR: KPI ID must be between 1 and 4');
+        addTerminalEntry('ERROR: Failed to process query. Please try again.');
         addTerminalEntry('');
       }
-      return;
+    } catch (error) {
+      addTerminalEntry('');
+      addTerminalEntry('ERROR: Network error. Please check your connection.');
+      addTerminalEntry('');
     }
 
-    // Re-evaluate MSID
-    const reevalMatch = cmd.match(/re-?evaluate\s+msid\s+(.+)/i);
-    if (reevalMatch) {
-      const msid = reevalMatch[1].trim();
-      const record = mergedData?.find((m) => m.source.MSID === msid);
-      
-      if (!record) {
-        addTerminalEntry('');
-        addTerminalEntry(`ERROR: MSID "${msid}" not found in dataset`);
-        addTerminalEntry('');
-        return;
-      }
-
-      addTerminalEntry('');
-      addTerminalEntry(`RE-EVALUATING MSID: ${msid}...`);
-      
-      try {
-        const response = await fetch('/api/evaluate', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            source: record.source,
-            target: record.target,
-            kpis,
-            msid,
-            userFeedback: 'User requested re-evaluation. Please review more carefully.',
-          }),
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          updateEvaluationResult(msid, result);
-          addTerminalEntry(`RE-EVALUATION COMPLETE for MSID: ${msid}`);
-          addLog('SUCCESS', `MSID ${msid} re-evaluated`);
-        } else {
-          addTerminalEntry('ERROR: Re-evaluation failed');
-        }
-      } catch (error) {
-        addTerminalEntry('ERROR: Network error during re-evaluation');
-      }
-      addTerminalEntry('');
-      return;
-    }
-
-    // Handle "I made a mistake in KPI X"
-    const mistakeMatch = cmd.match(/mistake.*kpi\s*(\d+)/i);
-    if (mistakeMatch) {
-      const kpiId = parseInt(mistakeMatch[1]);
-      addTerminalEntry('');
-      addTerminalEntry(`Acknowledged. Please update KPI ${kpiId} in the configuration panel.`);
-      addTerminalEntry('After updating, type "re-run kpi [N]" to re-evaluate.');
-      addTerminalEntry('');
-      return;
-    }
-
-    // Handle "You are wrong about MSID [X]"
-    const wrongMatch = cmd.match(/wrong.*msid\s*\[?([^\]]+)\]?/i);
-    if (wrongMatch) {
-      const msid = wrongMatch[1].trim();
-      addTerminalEntry('');
-      addTerminalEntry(`Acknowledged. Queuing MSID ${msid} for re-evaluation with your feedback.`);
-      addTerminalEntry(`Run: re-evaluate msid ${msid}`);
-      addTerminalEntry('');
-      return;
-    }
-
-    // Unknown command
-    addTerminalEntry('');
-    addTerminalEntry(`UNKNOWN COMMAND: ${command}`);
-    addTerminalEntry('Type "help" for available commands.');
-    addTerminalEntry('');
-  }, [currentPhase, sourceData, targetData, evaluationResults, mergedData, kpis, setPhase, addTerminalEntry, addLog, updateEvaluationResult]);
+    setIsTerminalProcessing(false);
+  }, [evaluationResults, kpis, mergedData, addTerminalEntry]);
 
   const handleReset = () => {
     useAppStore.getState().clearData();
@@ -388,7 +278,7 @@ export default function Home() {
               ┌─── DATA UPLOAD INTERFACE ───┐
             </div>
 
-            <div className="text-matrix-green/60 text-sm mb-4">
+            <div className="text-matrix-green text-sm mb-4">
               Both CSVs must include the MSID column.
             </div>
 
@@ -444,7 +334,7 @@ export default function Home() {
         {/* Terminal - Only visible after results are shown (for feedback) */}
         {currentPhase === 'RESULTS' && (
           <div className="mt-8">
-            <Terminal onCommand={handleTerminalCommand} />
+            <Terminal onCommand={handleTerminalQuery} isProcessing={isTerminalProcessing} />
           </div>
         )}
       </div>

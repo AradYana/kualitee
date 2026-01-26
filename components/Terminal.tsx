@@ -5,9 +5,10 @@ import { useAppStore } from '@/lib/store';
 
 interface TerminalProps {
   onCommand: (command: string) => void;
+  isProcessing?: boolean;
 }
 
-export default function Terminal({ onCommand }: TerminalProps) {
+export default function Terminal({ onCommand, isProcessing = false }: TerminalProps) {
   const [input, setInput] = useState('');
   const { terminalHistory, addTerminalEntry } = useAppStore();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -21,33 +22,16 @@ export default function Terminal({ onCommand }: TerminalProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (input.trim()) {
+    if (input.trim() && !isProcessing) {
       addTerminalEntry(`C:\\USER\\KUALITEE> ${input}`);
       onCommand(input.trim());
       setInput('');
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      // Auto-complete suggestions
-      const suggestions = [
-        'help',
-        'status',
-        'drill down on failures',
-        're-evaluate',
-        're-configure',
-        'clear',
-        'export',
-      ];
-      const match = suggestions.find((s) =>
-        s.toLowerCase().startsWith(input.toLowerCase())
-      );
-      if (match) {
-        setInput(match);
-      }
-    }
+  const handleSuggestionClick = (suggestion: string) => {
+    setInput(suggestion);
+    inputRef.current?.focus();
   };
 
   return (
@@ -58,8 +42,35 @@ export default function Terminal({ onCommand }: TerminalProps) {
           ┌─ KUALITEE TERMINAL v1.0 ─┐
         </span>
         <span className="text-matrix-green/40 text-xs">
-          Type &quot;help&quot; for commands
+          Feedback & Analysis
         </span>
+      </div>
+
+      {/* Suggestions */}
+      <div className="border-b border-matrix-green/30 px-3 py-2 bg-black/30">
+        <div className="text-matrix-green/50 text-xs mb-2">
+          ► TRY ASKING:
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => handleSuggestionClick('Show all MSIDs where KPI_1 < 3')}
+            className="text-xs text-warning-amber hover:text-matrix-green border border-warning-amber/50 hover:border-matrix-green px-2 py-1 transition-colors"
+          >
+            &quot;Show all MSIDs where KPI_1 &lt; 3&quot;
+          </button>
+          <button
+            onClick={() => handleSuggestionClick('Summarize common failure reasons for KPI_3')}
+            className="text-xs text-warning-amber hover:text-matrix-green border border-warning-amber/50 hover:border-matrix-green px-2 py-1 transition-colors"
+          >
+            &quot;Summarize common failure reasons for KPI_3&quot;
+          </button>
+          <button
+            onClick={() => handleSuggestionClick('Show average score for pages with health related essence')}
+            className="text-xs text-warning-amber hover:text-matrix-green border border-warning-amber/50 hover:border-matrix-green px-2 py-1 transition-colors"
+          >
+            &quot;Show average score for pages with health related essence&quot;
+          </button>
+        </div>
       </div>
 
       {/* Terminal Output */}
@@ -69,17 +80,26 @@ export default function Terminal({ onCommand }: TerminalProps) {
       >
         {/* Boot message */}
         <div className="text-matrix-green/60 mb-2">
-          KUALITEE COMMAND INTERFACE INITIALIZED
+          KUALITEE FEEDBACK INTERFACE INITIALIZED
+          <br />
+          Ask questions about your evaluation results in natural language.
           <br />
           ─────────────────────────────────────────
         </div>
 
-        {/* Terminal history (user commands and responses only) */}
+        {/* Terminal history */}
         {terminalHistory.map((entry, index) => (
-          <div key={`history-${index}`} className="text-matrix-green">
+          <div key={`history-${index}`} className="text-matrix-green whitespace-pre-wrap">
             {entry}
           </div>
         ))}
+
+        {/* Processing indicator */}
+        {isProcessing && (
+          <div className="text-warning-amber animate-pulse">
+            PROCESSING QUERY...
+          </div>
+        )}
       </div>
 
       {/* Terminal Input */}
@@ -91,9 +111,9 @@ export default function Terminal({ onCommand }: TerminalProps) {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
             className="flex-1 bg-transparent border-none outline-none text-matrix-green cursor-blink"
-            placeholder=""
+            placeholder={isProcessing ? 'Processing...' : 'Ask a question about your results...'}
+            disabled={isProcessing}
             autoFocus
           />
         </div>
