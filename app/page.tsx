@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import ASCIIHeader from '@/components/ASCIIHeader';
 import FileUpload from '@/components/FileUpload';
 import KPIConfig from '@/components/KPIConfig';
@@ -39,6 +39,13 @@ export default function Home() {
 
   const [showFailuresOnly, setShowFailuresOnly] = useState(false);
   const [isTerminalProcessing, setIsTerminalProcessing] = useState(false);
+
+  // Scroll to top when results are ready
+  useEffect(() => {
+    if (currentPhase === 'RESULTS') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentPhase]);
 
   // Validate and merge data
   const validateAndMergeData = useCallback(() => {
@@ -333,7 +340,10 @@ export default function Home() {
 
         {/* Terminal - Only visible after results are shown (for feedback) */}
         {currentPhase === 'RESULTS' && (
-          <div className="mt-8">
+          <div className="mt-8 pt-4 border-t border-matrix-green/30">
+            <div className="text-matrix-green/60 text-sm mb-4 text-center">
+              ▼ SCROLL DOWN FOR FEEDBACK TERMINAL ▼
+            </div>
             <Terminal onCommand={handleTerminalQuery} isProcessing={isTerminalProcessing} />
           </div>
         )}

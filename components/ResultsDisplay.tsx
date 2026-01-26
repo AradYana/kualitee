@@ -96,7 +96,11 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
   }, [dataMismatchLog]);
 
   if (!evaluationResults || evaluationResults.length === 0) {
-    return null;
+    return (
+      <div className="text-center text-warning-amber p-8">
+        No evaluation results available.
+      </div>
+    );
   }
 
   const getStatusIndicator = (score: number) => {
