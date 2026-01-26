@@ -49,11 +49,27 @@ export default function FileUpload({ label, onDataLoaded, onError }: FileUploadP
         throw new Error('Unsupported file format. Please use CSV or Excel files.');
       }
 
-      // Validate MSID column exists
-      if (data.length > 0 && !('MSID' in data[0])) {
-        onError(`MSID column not found in ${label}`);
-        setIsProcessing(false);
-        return;
+      // Find MSID column (case-insensitive) and normalize to uppercase MSID
+      if (data.length > 0) {
+        const firstRow = data[0];
+        const msidKey = Object.keys(firstRow).find(
+          (key) => key.toLowerCase() === 'msid'
+        );
+
+        if (!msidKey) {
+          onError(`MSID column not found in ${label}`);
+          setIsProcessing(false);
+          return;
+        }
+
+        // If the key is not exactly 'MSID', normalize all rows
+        if (msidKey !== 'MSID') {
+          data = data.map((row) => {
+            const newRow: DataRow = { ...row, MSID: row[msidKey] as string };
+            delete (newRow as Record<string, unknown>)[msidKey];
+            return newRow;
+          });
+        }
       }
 
       setRowCount(data.length);
