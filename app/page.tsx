@@ -437,8 +437,8 @@ export default function Home() {
           <ResultsDisplay filterFailures={showFailuresOnly} />
         )}
 
-        {/* Terminal - Always visible after upload */}
-        {currentPhase !== 'UPLOAD' && (
+        {/* Terminal - Only visible after results are shown (for feedback) */}
+        {currentPhase === 'RESULTS' && (
           <div className="mt-8">
             <Terminal onCommand={handleTerminalCommand} />
           </div>
