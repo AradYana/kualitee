@@ -97,8 +97,25 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
 
   if (!evaluationResults || evaluationResults.length === 0) {
     return (
-      <div className="text-center text-warning-amber p-8">
-        No evaluation results available.
+      <div className="border border-error-red p-8 text-center">
+        <div className="text-error-red text-lg mb-4">
+          ⚠ NO EVALUATION RESULTS AVAILABLE
+        </div>
+        <div className="text-warning-amber text-sm">
+          This usually means:
+          <br />
+          1. OpenAI API key is not configured in .env.local
+          <br />
+          2. The API request failed
+          <br />
+          <br />
+          Please add your OpenAI API key to the .env.local file:
+          <br />
+          <code className="text-matrix-green">OPENAI_API_KEY=sk-your-key-here</code>
+          <br />
+          <br />
+          Then restart the development server.
+        </div>
       </div>
     );
   }

@@ -163,15 +163,28 @@ export default function Home() {
           }),
         });
 
+        const data = await response.json();
+        
         if (!response.ok) {
-          throw new Error('Evaluation API failed');
+          addLog('ERROR', `API Error: ${data.error || 'Unknown error'}`);
+          throw new Error(data.error || 'Evaluation API failed');
         }
 
-        const data = await response.json();
-        allResults.push(...data.results);
+        if (data.results && data.results.length > 0) {
+          allResults.push(...data.results);
+        } else {
+          addLog('WARNING', `Batch ${i + 1} returned no results`);
+        }
       } catch (error) {
         addLog('ERROR', `Batch ${i + 1} failed: ${error}`);
       }
+    }
+
+    if (allResults.length === 0) {
+      addLog('ERROR', 'No results returned from evaluation. Check if OpenAI API key is configured.');
+      setLoading(false);
+      setPhase('KPI_CONFIG');
+      return;
     }
 
     setEvaluationResults(allResults);

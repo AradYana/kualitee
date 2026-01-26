@@ -51,8 +51,13 @@ export default function KPIConfig({ onComplete }: KPIConfigProps) {
     addLog('INFO', `KPI ${currentKPI.id}: ${currentKPI.name} [${currentKPI.shortName}] configured`);
 
     if (isLastKPI) {
-      // All KPIs configured, proceed to evaluation
-      finishConfiguration();
+      // All KPIs configured - filter and save only configured ones
+      const configuredKPIs = kpis.filter(
+        kpi => kpi.name.trim() && kpi.description.trim()
+      );
+      setKPIs(configuredKPIs);
+      addLog('SUCCESS', `KPI configuration completed with ${configuredKPIs.length} KPI(s)`);
+      onComplete();
     } else {
       // Move to next KPI
       setCurrentKPIIndex(currentKPIIndex + 1);
@@ -61,7 +66,7 @@ export default function KPIConfig({ onComplete }: KPIConfigProps) {
   };
 
   const handleSkip = () => {
-    // Clear the current KPI and all remaining KPIs
+    // Keep only the already configured KPIs (before current index)
     const configuredKPIs = kpis.slice(0, currentKPIIndex).filter(
       kpi => kpi.name.trim() && kpi.description.trim()
     );
@@ -75,14 +80,6 @@ export default function KPIConfig({ onComplete }: KPIConfigProps) {
     setKPIs(configuredKPIs);
     
     addLog('INFO', `Skipping remaining KPIs. Using ${configuredKPIs.length} KPI(s)`);
-    finishConfiguration();
-  };
-
-  const finishConfiguration = () => {
-    const configuredKPIs = kpis.filter(
-      kpi => kpi.name.trim() && kpi.description.trim()
-    );
-    
     addLog('SUCCESS', `KPI configuration completed with ${configuredKPIs.length} KPI(s)`);
     onComplete();
   };
