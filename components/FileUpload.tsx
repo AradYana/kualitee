@@ -25,7 +25,6 @@ export default function FileUpload({ label, onDataLoaded, onError }: FileUploadP
       let data: DataRow[] = [];
 
       if (extension === 'csv') {
-        // Parse CSV
         const text = await file.text();
         const result = Papa.parse<DataRow>(text, {
           header: true,
@@ -39,7 +38,6 @@ export default function FileUpload({ label, onDataLoaded, onError }: FileUploadP
 
         data = result.data;
       } else if (extension === 'xlsx' || extension === 'xls') {
-        // Parse Excel
         const buffer = await file.arrayBuffer();
         const workbook = XLSX.read(buffer, { type: 'array' });
         const firstSheetName = workbook.SheetNames[0];
@@ -49,7 +47,6 @@ export default function FileUpload({ label, onDataLoaded, onError }: FileUploadP
         throw new Error('Unsupported file format. Please use CSV or Excel files.');
       }
 
-      // Find MSID column (case-insensitive) and normalize to uppercase MSID
       if (data.length > 0) {
         const firstRow = data[0];
         const msidKey = Object.keys(firstRow).find(
@@ -62,7 +59,6 @@ export default function FileUpload({ label, onDataLoaded, onError }: FileUploadP
           return;
         }
 
-        // If the key is not exactly 'MSID', normalize all rows
         if (msidKey !== 'MSID') {
           data = data.map((row) => {
             const newRow: DataRow = { ...row, MSID: row[msidKey] as string };
@@ -89,9 +85,9 @@ export default function FileUpload({ label, onDataLoaded, onError }: FileUploadP
   };
 
   return (
-    <div className="border border-matrix-green p-4">
-      <div className="text-matrix-green/60 text-sm mb-2">
-        ┌─── {label} ───┐
+    <div className="terminal-output p-4">
+      <div className="text-sm font-semibold text-text-primary mb-3">
+        📄 {label}
       </div>
       
       <div className="mb-3">
@@ -100,33 +96,29 @@ export default function FileUpload({ label, onDataLoaded, onError }: FileUploadP
           accept=".csv,.xlsx,.xls"
           onChange={handleFileChange}
           disabled={isProcessing}
-          className="w-full"
+          className="text-input w-full text-sm"
         />
       </div>
 
       {isProcessing && (
-        <div className="text-warning-amber animate-pulse">
-          READING FILE DATA...
+        <div className="text-text-secondary text-sm animate-pulse">
+          Reading file data...
         </div>
       )}
 
       {fileName && !isProcessing && (
-        <div className="text-matrix-green text-sm">
-          <div>FILE: {fileName}</div>
+        <div className="text-sm">
+          <div className="text-text-primary">File: {fileName}</div>
           {rowCount !== null && (
-            <div className="text-matrix-green/60">
-              RECORDS LOADED: {rowCount}
+            <div className="text-text-secondary">
+              Records loaded: {rowCount}
             </div>
           )}
-          <div className="text-matrix-green mt-1">
-            ✓ DATA READY
+          <div className="mt-1 font-semibold" style={{ color: '#008000' }}>
+            ✓ Data Ready
           </div>
         </div>
       )}
-
-      <div className="text-matrix-green/60 text-sm mt-2">
-        └─────────────────────┘
-      </div>
     </div>
   );
 }

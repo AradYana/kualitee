@@ -9,47 +9,32 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'matrix-green': '#00FF00',
-        'matrix-dark': '#003300',
-        'dos-black': '#000000',
-        'error-red': '#FF0000',
-        'warning-amber': '#FFAA00',
+        // Neo-Retro Industrial palette
+        'page-bg': '#cec5b4',
+        'window-bg': '#e6e0d4',
+        'title-bar': '#084999',
+        'chip-bg': '#A8C4E1',
+        'border-gray': '#808080',
+        'text-primary': '#000000',
+        'text-secondary': '#4D4D4D',
+        'logo-fill': '#9cc4de',
+        'logo-shadow': '#98BBDD',
       },
       fontFamily: {
-        'dos': ['Courier New', 'Consolas', 'monospace'],
+        'mono': ['Courier Prime', 'Roboto Mono', 'Consolas', 'monospace'],
+        'sans': ['Inter', 'Segoe UI', 'Arial', 'sans-serif'],
       },
-      animation: {
-        'flicker': 'flicker 0.15s infinite',
-        'scanline': 'scanline 8s linear infinite',
-        'blink': 'blink 1s step-end infinite',
-        'glitch': 'glitch 0.3s infinite',
-        'loading-bar': 'loading-bar 2s ease-in-out',
+      borderRadius: {
+        'window': '12px',
+        'terminal': '6px',
+        'chip': '8px',
+        'input': '4px',
+        'btn': '6px',
       },
-      keyframes: {
-        flicker: {
-          '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.8' },
-        },
-        scanline: {
-          '0%': { transform: 'translateY(-100%)' },
-          '100%': { transform: 'translateY(100%)' },
-        },
-        blink: {
-          '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0' },
-        },
-        glitch: {
-          '0%': { transform: 'translate(0)' },
-          '20%': { transform: 'translate(-2px, 2px)' },
-          '40%': { transform: 'translate(-2px, -2px)' },
-          '60%': { transform: 'translate(2px, 2px)' },
-          '80%': { transform: 'translate(2px, -2px)' },
-          '100%': { transform: 'translate(0)' },
-        },
-        'loading-bar': {
-          '0%': { width: '0%' },
-          '100%': { width: '100%' },
-        },
+      boxShadow: {
+        'bevel': 'inset 1px 1px 0px #000000',
+        'bevel-out': 'inset -1px -1px 0px #000000, inset 1px 1px 0px #FFFFFF',
+        'soft': '0 2px 8px rgba(0, 0, 0, 0.15)',
       },
     },
   },

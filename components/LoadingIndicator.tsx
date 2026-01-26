@@ -4,12 +4,11 @@ import { useEffect, useState } from 'react';
 
 interface LoadingIndicatorProps {
   message: string;
-  showBar?: boolean;
 }
 
-export default function LoadingIndicator({ message, showBar = true }: LoadingIndicatorProps) {
+export default function LoadingIndicator({ message }: LoadingIndicatorProps) {
   const [dots, setDots] = useState('');
-  const [barProgress, setBarProgress] = useState(0);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const dotInterval = setInterval(() => {
@@ -20,40 +19,47 @@ export default function LoadingIndicator({ message, showBar = true }: LoadingInd
   }, []);
 
   useEffect(() => {
-    if (showBar) {
-      const barInterval = setInterval(() => {
-        setBarProgress((prev) => (prev >= 100 ? 0 : prev + 2));
-      }, 100);
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => (prev >= 100 ? 0 : prev + 2));
+    }, 100);
 
-      return () => clearInterval(barInterval);
-    }
-  }, [showBar]);
-
-  const barWidth = 40;
-  const filledWidth = Math.floor((barProgress / 100) * barWidth);
-  const emptyWidth = barWidth - filledWidth;
+    return () => clearInterval(progressInterval);
+  }, []);
 
   return (
-    <div className="text-center py-8">
-      <div className="text-matrix-green animate-pulse text-lg mb-4">
-        {message}{dots}
-      </div>
-      
-      {showBar && (
-        <div className="inline-block text-left font-mono">
-          <div className="text-matrix-green/60 text-sm mb-1">
-            PROGRESS: {barProgress}%
-          </div>
-          <div className="text-matrix-green">
-            [{('█').repeat(filledWidth)}{('░').repeat(emptyWidth)}]
-          </div>
+    <div className="terminal-window overflow-hidden">
+      <div className="title-bar">
+        <span>⏳ Processing</span>
+        <div className="title-bar-controls">
+          <button className="title-bar-btn">─</button>
+          <button className="title-bar-btn">□</button>
+          <button className="title-bar-btn">×</button>
         </div>
-      )}
+      </div>
 
-      <div className="mt-4 text-matrix-green/40 text-xs">
-        <span className="animate-pulse">◄</span>
-        {' PLEASE WAIT '}
-        <span className="animate-pulse">►</span>
+      <div className="p-8 text-center" style={{ backgroundColor: '#e6e0d4' }}>
+        <div className="text-lg text-text-primary mb-4">
+          {message}{dots}
+        </div>
+        
+        {/* Progress bar */}
+        <div className="w-full max-w-md mx-auto h-6 border-2 border-border-gray rounded-input overflow-hidden" style={{ backgroundColor: '#FFFFFF' }}>
+          <div 
+            className="h-full transition-all duration-100"
+            style={{ 
+              width: `${progress}%`,
+              backgroundColor: '#084999'
+            }}
+          />
+        </div>
+
+        <div className="mt-4 text-sm text-text-secondary">
+          Progress: {progress}%
+        </div>
+
+        <div className="mt-6 text-xs text-text-secondary">
+          Please wait while we process your data...
+        </div>
       </div>
     </div>
   );

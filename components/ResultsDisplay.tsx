@@ -10,7 +10,6 @@ interface ResultsDisplayProps {
 export default function ResultsDisplay({ filterFailures = false }: ResultsDisplayProps) {
   const { evaluationResults, kpis, dataMismatchLog } = useAppStore();
 
-  // Calculate summary statistics with Mean and Median
   const summaryStats = useMemo(() => {
     if (!evaluationResults || evaluationResults.length === 0) return [];
 
@@ -18,41 +17,21 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
       const scores = evaluationResults
         .flatMap((r) => r.scores.filter((s: any) => s.kpiId === kpi.id))
         .map((s: any) => s.score)
-        .filter((s: number) => s > 0); // Filter out failed evaluations
+        .filter((s: number) => s > 0);
 
       if (scores.length === 0) {
-        return {
-          kpiId: kpi.id,
-          kpiName: kpi.name,
-          shortName: kpi.shortName,
-          mean: 0,
-          median: 0,
-          count: 0,
-        };
+        return { kpiId: kpi.id, kpiName: kpi.name, shortName: kpi.shortName, mean: 0, median: 0, count: 0 };
       }
 
-      // Calculate mean
       const mean = scores.reduce((a: number, b: number) => a + b, 0) / scores.length;
-
-      // Calculate median
       const sorted = [...scores].sort((a, b) => a - b);
       const mid = Math.floor(sorted.length / 2);
-      const median = sorted.length % 2 !== 0
-        ? sorted[mid]
-        : (sorted[mid - 1] + sorted[mid]) / 2;
+      const median = sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 
-      return {
-        kpiId: kpi.id,
-        kpiName: kpi.name,
-        shortName: kpi.shortName,
-        mean: mean,
-        median: median,
-        count: scores.length,
-      };
+      return { kpiId: kpi.id, kpiName: kpi.name, shortName: kpi.shortName, mean, median, count: scores.length };
     });
   }, [evaluationResults, kpis]);
 
-  // Build detailed results array
   const detailedResults = useMemo(() => {
     if (!evaluationResults) return [];
 
@@ -62,271 +41,243 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
       result.scores.forEach((score: any) => {
         const kpi = kpis.find(k => k.id === score.kpiId);
         const kpiKey = kpi?.shortName || `KPI_${score.kpiId}`;
-        kpiScores[kpiKey] = {
-          score: score.score,
-          justification: score.explanation,
-        };
+        kpiScores[kpiKey] = { score: score.score, justification: score.explanation };
       });
 
-      return {
-        msid: result.msid,
-        scores: kpiScores,
-      };
+      return { msid: result.msid, scores: kpiScores };
     });
 
-    // Apply filter if showing failures only
     if (filterFailures) {
-      return results.filter((r: any) => 
-        Object.values(r.scores).some((s: any) => s.score < 3)
-      );
+      return results.filter((r: any) => Object.values(r.scores).some((s: any) => s.score < 3));
     }
 
     return results;
   }, [evaluationResults, kpis, filterFailures]);
 
-  // System logs (data mismatches)
   const systemLogs = useMemo(() => {
     return dataMismatchLog.map((mismatch, index) => ({
-      id: index + 1,
-      type: 'DATA_MISMATCH',
-      msid: mismatch.msid,
-      field: mismatch.field,
-      message: 'Empty cell detected',
+      id: index + 1, type: 'DATA_MISMATCH', msid: mismatch.msid, field: mismatch.field, message: 'Empty cell detected',
     }));
   }, [dataMismatchLog]);
 
   if (!evaluationResults || evaluationResults.length === 0) {
     return (
-      <div className="border border-error-red p-8 text-center">
-        <div className="text-error-red text-lg mb-4">
-          ⚠ NO EVALUATION RESULTS AVAILABLE
+      <div className="terminal-window overflow-hidden">
+        <div className="title-bar">
+          <span>⚠️ Error</span>
+          <div className="title-bar-controls">
+            <button className="title-bar-btn">×</button>
+          </div>
         </div>
-        <div className="text-warning-amber text-sm">
-          This usually means:
-          <br />
-          1. Anthropic API key is not configured in .env.local
-          <br />
-          2. The API request failed
-          <br />
-          <br />
-          Please add your Anthropic API key to the .env.local file:
-          <br />
-          <code className="text-matrix-green">ANTHROPIC_API_KEY=sk-ant-your-key-here</code>
-          <br />
-          <br />
-          Get your key at: https://console.anthropic.com/
-          <br />
-          Then restart the development server.
+        <div className="p-6 text-center" style={{ backgroundColor: '#e6e0d4' }}>
+          <p className="font-bold mb-2" style={{ color: '#CC0000' }}>No evaluation results available</p>
+          <p className="text-sm text-text-secondary">
+            This usually means the Anthropic API key is not configured.
+          </p>
+          <p className="text-sm text-text-secondary mt-2">
+            Add your key to <code className="px-1" style={{ backgroundColor: '#FFFFFF' }}>.env.local</code>:
+          </p>
+          <p className="text-sm font-mono p-2 mt-2 inline-block" style={{ backgroundColor: '#FFFFFF' }}>
+            ANTHROPIC_API_KEY=sk-ant-your-key-here
+          </p>
         </div>
       </div>
     );
   }
 
-  const getStatusIndicator = (score: number) => {
-    if (score >= 4.5) return { text: 'OPTIMAL', color: 'text-matrix-green' };
-    if (score >= 3.5) return { text: 'GOOD', color: 'text-matrix-green/80' };
-    if (score >= 2.5) return { text: 'MARGINAL', color: 'text-warning-amber' };
-    return { text: 'CRITICAL', color: 'text-error-red' };
+  const getStatusColor = (score: number) => {
+    if (score >= 4.5) return '#008000';
+    if (score >= 3.5) return '#228B22';
+    if (score >= 2.5) return '#FF8C00';
+    return '#CC0000';
+  };
+
+  const getStatusText = (score: number) => {
+    if (score >= 4.5) return 'OPTIMAL';
+    if (score >= 3.5) return 'GOOD';
+    if (score >= 2.5) return 'MARGINAL';
+    return 'CRITICAL';
   };
 
   const overallMean = summaryStats.length > 0
     ? summaryStats.reduce((acc, s) => acc + s.mean, 0) / summaryStats.length
     : 0;
-  const status = getStatusIndicator(overallMean);
 
   return (
     <div className="space-y-6">
-      {/* Executive Summary Header */}
-      <div className="border border-matrix-green p-4">
-        <div className="text-matrix-green mb-3">
-          ╔═══════════════════════════════════════════════════════╗
-          <br />
-          ║&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ANALYSIS RESULTS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;║
-          <br />
-          ╚═══════════════════════════════════════════════════════╝
-        </div>
-
-        <div className="font-mono text-sm space-y-2">
-          <div>
-            TOTAL RECORDS EVALUATED: {evaluationResults.length}
-          </div>
-          <div>
-            OVERALL STATUS:{' '}
-            <span className={status.color}>[{status.text}]</span>
-          </div>
-          <div>
-            AGGREGATE MEAN SCORE: {overallMean.toFixed(2)} / 5.00
+      {/* Summary Stats */}
+      <div className="terminal-window overflow-hidden">
+        <div className="title-bar">
+          <span>📊 Summary Statistics</span>
+          <div className="title-bar-controls">
+            <button className="title-bar-btn">─</button>
+            <button className="title-bar-btn">□</button>
+            <button className="title-bar-btn">×</button>
           </div>
         </div>
-      </div>
+        <div className="p-5" style={{ backgroundColor: '#e6e0d4' }}>
+          {/* Overview */}
+          <div className="suggestion-chip inline-block mb-4">
+            Total Records: {evaluationResults.length} | 
+            Overall Score: <span style={{ color: getStatusColor(overallMean), fontWeight: 'bold' }}>
+              {overallMean.toFixed(2)} / 5.00 [{getStatusText(overallMean)}]
+            </span>
+          </div>
 
-      {/* SECTION 1: summary_stats - Mean/Median scores per KPI */}
-      <div className="border border-matrix-green p-4">
-        <div className="text-matrix-green mb-3">
-          ┌─── summary_stats: KPI STATISTICS ───┐
-        </div>
-
-        <table className="dos-table w-full text-sm">
-          <thead>
-            <tr>
-              <th>KPI</th>
-              <th>NAME</th>
-              <th>MEAN</th>
-              <th>MEDIAN</th>
-              <th>SAMPLES</th>
-              <th>STATUS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {summaryStats.map((stat) => {
-              const kpiStatus = getStatusIndicator(stat.mean);
-              return (
-                <tr key={stat.kpiId}>
-                  <td className="text-warning-amber">[{stat.shortName}]</td>
-                  <td>{stat.kpiName}</td>
-                  <td className={kpiStatus.color}>{stat.mean.toFixed(2)}</td>
-                  <td className={kpiStatus.color}>{stat.median.toFixed(2)}</td>
-                  <td>{stat.count}</td>
-                  <td className={kpiStatus.color}>{kpiStatus.text}</td>
+          {/* KPI Stats Table */}
+          <div className="terminal-output overflow-hidden">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>KPI</th>
+                  <th>Name</th>
+                  <th>Mean</th>
+                  <th>Median</th>
+                  <th>Samples</th>
+                  <th>Status</th>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
-
-        <div className="text-matrix-green/60 mt-2">
-          └─────────────────────────────────────────────────────────┘
-        </div>
-      </div>
-
-      {/* SECTION 2: detailed_results - Array of MSID, scores, justifications */}
-      <div className="border border-matrix-green p-4">
-        <div className="text-matrix-green mb-3">
-          ┌─── detailed_results: EVALUATION DATA {filterFailures && '(FAILURES ONLY)'} ───┐
-        </div>
-
-        <div className="text-matrix-green/60 text-xs mb-2">
-          Showing {detailedResults.length} records | Hover over scores for justifications
-        </div>
-
-        <div className="max-h-96 overflow-y-auto">
-          <table className="dos-table w-full text-xs">
-            <thead className="sticky top-0 bg-dos-black">
-              <tr>
-                <th>MSID</th>
-                {kpis.map((kpi) => (
-                  <th key={kpi.id}>
-                    {kpi.shortName || `KPI_${kpi.id}`}
-                    <br />
-                    <span className="text-matrix-green/50 font-normal">score</span>
-                  </th>
+              </thead>
+              <tbody>
+                {summaryStats.map((stat) => (
+                  <tr key={stat.kpiId}>
+                    <td className="font-bold">[{stat.shortName}]</td>
+                    <td>{stat.kpiName}</td>
+                    <td style={{ color: getStatusColor(stat.mean), fontWeight: 'bold' }}>{stat.mean.toFixed(2)}</td>
+                    <td style={{ color: getStatusColor(stat.median), fontWeight: 'bold' }}>{stat.median.toFixed(2)}</td>
+                    <td>{stat.count}</td>
+                    <td style={{ color: getStatusColor(stat.mean), fontWeight: 'bold' }}>{getStatusText(stat.mean)}</td>
+                  </tr>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {detailedResults.map((result: any) => (
-                <tr key={result.msid}>
-                  <td className="font-bold">{result.msid}</td>
-                  {kpis.map((kpi) => {
-                    const kpiKey = kpi.shortName || `KPI_${kpi.id}`;
-                    const scoreData = result.scores[kpiKey];
-                    const score = scoreData?.score || 0;
-                    const justification = scoreData?.justification || 'N/A';
-                    const scoreStatus = getStatusIndicator(score);
-                    return (
-                      <td
-                        key={kpi.id}
-                        className={`${scoreStatus.color} cursor-help`}
-                        title={`Justification: ${justification}`}
-                      >
-                        {score > 0 ? score : '-'}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Expanded view for justifications */}
-        <details className="mt-4">
-          <summary className="text-matrix-green cursor-pointer hover:text-matrix-green/80">
-            ► Click to expand full justifications
-          </summary>
-          <div className="mt-2 max-h-64 overflow-y-auto border border-matrix-green/30 p-2">
-            {detailedResults.slice(0, 20).map((result: any) => (
-              <div key={result.msid} className="mb-3 text-xs">
-                <div className="text-warning-amber font-bold">MSID: {result.msid}</div>
-                {kpis.map((kpi) => {
-                  const kpiKey = kpi.shortName || `KPI_${kpi.id}`;
-                  const scoreData = result.scores[kpiKey];
-                  return (
-                    <div key={kpi.id} className="ml-2 text-matrix-green/80">
-                      [{kpiKey}] Score: {scoreData?.score || '-'} | {scoreData?.justification || 'N/A'}
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-            {detailedResults.length > 20 && (
-              <div className="text-matrix-green/50">... and {detailedResults.length - 20} more records</div>
-            )}
+              </tbody>
+            </table>
           </div>
-        </details>
-
-        <div className="text-matrix-green/60 mt-2">
-          └─────────────────────────────────────────────────────────┘
         </div>
       </div>
 
-      {/* SECTION 3: system_logs - Data Mismatch errors */}
-      <div className={`border p-4 ${systemLogs.length > 0 ? 'border-warning-amber' : 'border-matrix-green'}`}>
-        <div className={`mb-3 ${systemLogs.length > 0 ? 'text-warning-amber' : 'text-matrix-green'}`}>
-          ┌─── system_logs: DATA INTEGRITY REPORT ───┐
-        </div>
-
-        {systemLogs.length === 0 ? (
-          <div className="text-matrix-green text-sm">
-            ✓ NO DATA MISMATCHES DETECTED
-            <br />
-            <span className="text-matrix-green/60">All cells contain valid data.</span>
+      {/* Detailed Results */}
+      <div className="terminal-window overflow-hidden">
+        <div className="title-bar">
+          <span>📋 Detailed Results {filterFailures && '(Failures Only)'}</span>
+          <div className="title-bar-controls">
+            <button className="title-bar-btn">─</button>
+            <button className="title-bar-btn">□</button>
+            <button className="title-bar-btn">×</button>
           </div>
-        ) : (
-          <>
-            <div className="text-warning-amber/80 text-xs mb-2">
-              {systemLogs.length} data integrity issue(s) detected
-            </div>
+        </div>
+        <div className="p-5" style={{ backgroundColor: '#e6e0d4' }}>
+          <p className="text-xs text-text-secondary mb-3">
+            Showing {detailedResults.length} records • Hover over scores for justifications
+          </p>
 
-            <div className="max-h-48 overflow-y-auto">
-              <table className="dos-table w-full text-xs">
-                <thead>
-                  <tr className="text-warning-amber">
-                    <th>#</th>
-                    <th>TYPE</th>
+          <div className="terminal-output overflow-hidden">
+            <div className="max-h-64 overflow-y-auto">
+              <table className="data-table">
+                <thead className="sticky top-0">
+                  <tr>
                     <th>MSID</th>
-                    <th>FIELD</th>
-                    <th>MESSAGE</th>
+                    {kpis.map((kpi) => (
+                      <th key={kpi.id}>{kpi.shortName || `KPI_${kpi.id}`}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {systemLogs.map((log) => (
-                    <tr key={log.id} className="text-warning-amber/80">
-                      <td>{log.id}</td>
-                      <td>{log.type}</td>
-                      <td>{log.msid}</td>
-                      <td>{log.field}</td>
-                      <td>{log.message}</td>
+                  {detailedResults.map((result: any) => (
+                    <tr key={result.msid}>
+                      <td className="font-mono font-bold">{result.msid}</td>
+                      {kpis.map((kpi) => {
+                        const kpiKey = kpi.shortName || `KPI_${kpi.id}`;
+                        const scoreData = result.scores[kpiKey];
+                        const score = scoreData?.score || 0;
+                        return (
+                          <td
+                            key={kpi.id}
+                            className="text-center cursor-help font-bold"
+                            style={{ color: getStatusColor(score) }}
+                            title={scoreData?.justification || 'N/A'}
+                          >
+                            {score > 0 ? score : '-'}
+                          </td>
+                        );
+                      })}
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </>
-        )}
+          </div>
 
-        <div className={`mt-2 ${systemLogs.length > 0 ? 'text-warning-amber/60' : 'text-matrix-green/60'}`}>
-          └─────────────────────────────────────────────────────────┘
+          <details className="mt-4">
+            <summary className="cursor-pointer text-sm hover:underline" style={{ color: '#084999' }}>
+              📖 View full justifications
+            </summary>
+            <div className="terminal-output p-3 mt-2 max-h-48 overflow-y-auto">
+              {detailedResults.slice(0, 20).map((result: any) => (
+                <div key={result.msid} className="mb-3 text-xs border-b border-gray-200 pb-2">
+                  <div className="font-bold" style={{ color: '#084999' }}>MSID: {result.msid}</div>
+                  {kpis.map((kpi) => {
+                    const kpiKey = kpi.shortName || `KPI_${kpi.id}`;
+                    const scoreData = result.scores[kpiKey];
+                    return (
+                      <div key={kpi.id} className="ml-3 text-text-secondary">
+                        [{kpiKey}] Score: {scoreData?.score || '-'} — {scoreData?.justification || 'N/A'}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </details>
+        </div>
+      </div>
+
+      {/* System Logs */}
+      <div className="terminal-window overflow-hidden">
+        <div className="title-bar">
+          <span>{systemLogs.length > 0 ? '⚠️' : '✅'} System Logs</span>
+          <div className="title-bar-controls">
+            <button className="title-bar-btn">─</button>
+            <button className="title-bar-btn">□</button>
+            <button className="title-bar-btn">×</button>
+          </div>
+        </div>
+        <div className="p-5" style={{ backgroundColor: '#e6e0d4' }}>
+          {systemLogs.length === 0 ? (
+            <div className="suggestion-chip inline-block">
+              <span style={{ color: '#008000' }}>✓ No data integrity issues detected</span>
+            </div>
+          ) : (
+            <>
+              <p className="text-xs mb-3 font-bold" style={{ color: '#FF8C00' }}>
+                {systemLogs.length} data integrity issue(s) detected
+              </p>
+              <div className="terminal-output overflow-hidden">
+                <div className="max-h-32 overflow-y-auto">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Type</th>
+                        <th>MSID</th>
+                        <th>Field</th>
+                        <th>Message</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {systemLogs.map((log) => (
+                        <tr key={log.id}>
+                          <td>{log.id}</td>
+                          <td style={{ color: '#FF8C00' }}>{log.type}</td>
+                          <td>{log.msid}</td>
+                          <td>{log.field}</td>
+                          <td>{log.message}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

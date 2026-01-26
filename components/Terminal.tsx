@@ -23,7 +23,7 @@ export default function Terminal({ onCommand, isProcessing = false }: TerminalPr
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim() && !isProcessing) {
-      addTerminalEntry(`C:\\USER\\KUALITEE> ${input}`);
+      addTerminalEntry(`You: ${input}`);
       onCommand(input.trim());
       setInput('');
     }
@@ -34,90 +34,101 @@ export default function Terminal({ onCommand, isProcessing = false }: TerminalPr
     inputRef.current?.focus();
   };
 
+  const suggestedQueries = [
+    'Show low KPI scores (< 3)',
+    'Summarize common failures for KPI_3',
+    'Average score for health-related pages',
+  ];
+
   return (
-    <div className="border border-matrix-green bg-black/50">
-      {/* Terminal Header */}
-      <div className="border-b border-matrix-green px-3 py-1 flex justify-between items-center">
-        <span className="text-matrix-green/60 text-sm">
-          ┌─ KUALITEE TERMINAL v1.0 ─┐
-        </span>
-        <span className="text-matrix-green/40 text-xs">
-          Feedback & Analysis
-        </span>
-      </div>
-
-      {/* Suggestions */}
-      <div className="border-b border-matrix-green/30 px-3 py-2 bg-black/30">
-        <div className="text-matrix-green/50 text-xs mb-2">
-          ► TRY ASKING:
+    <div className="terminal-window overflow-hidden">
+      {/* Title Bar */}
+      <div className="title-bar">
+        <div className="flex items-center gap-2">
+          <span>Query Assistant</span>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => handleSuggestionClick('Show all MSIDs where KPI_1 < 3')}
-            className="text-xs text-warning-amber hover:text-matrix-green border border-warning-amber/50 hover:border-matrix-green px-2 py-1 transition-colors"
-          >
-            &quot;Show all MSIDs where KPI_1 &lt; 3&quot;
-          </button>
-          <button
-            onClick={() => handleSuggestionClick('Summarize common failure reasons for KPI_3')}
-            className="text-xs text-warning-amber hover:text-matrix-green border border-warning-amber/50 hover:border-matrix-green px-2 py-1 transition-colors"
-          >
-            &quot;Summarize common failure reasons for KPI_3&quot;
-          </button>
-          <button
-            onClick={() => handleSuggestionClick('Show average score for pages with health related essence')}
-            className="text-xs text-warning-amber hover:text-matrix-green border border-warning-amber/50 hover:border-matrix-green px-2 py-1 transition-colors"
-          >
-            &quot;Show average score for pages with health related essence&quot;
-          </button>
+        <div className="title-bar-controls">
+          <button className="title-bar-btn" title="Minimize">─</button>
+          <button className="title-bar-btn" title="Maximize">□</button>
+          <button className="title-bar-btn" title="Close">×</button>
         </div>
       </div>
 
-      {/* Terminal Output */}
-      <div
-        ref={containerRef}
-        className="h-48 overflow-y-auto p-3 font-mono text-sm"
-      >
-        {/* Boot message */}
-        <div className="text-matrix-green/60 mb-2">
-          KUALITEE FEEDBACK INTERFACE INITIALIZED
-          <br />
-          Ask questions about your evaluation results in natural language.
-          <br />
-          ─────────────────────────────────────────
-        </div>
-
-        {/* Terminal history */}
-        {terminalHistory.map((entry, index) => (
-          <div key={`history-${index}`} className="text-matrix-green whitespace-pre-wrap">
-            {entry}
+      {/* Window Content */}
+      <div className="p-5" style={{ backgroundColor: '#e6e0d4' }}>
+        {/* Suggested Queries */}
+        <div className="mb-5">
+          <p className="text-xs text-text-secondary mb-3 font-semibold uppercase tracking-wide">
+            ► Try Asking:
+          </p>
+          <div className="flex flex-wrap gap-3">
+            {suggestedQueries.map((query, index) => (
+              <button
+                key={index}
+                onClick={() => handleSuggestionClick(query)}
+                className="suggestion-chip"
+              >
+                {query}
+              </button>
+            ))}
           </div>
-        ))}
+        </div>
 
-        {/* Processing indicator */}
-        {isProcessing && (
-          <div className="text-warning-amber animate-pulse">
-            PROCESSING QUERY...
+        {/* Chat/Output Area */}
+        <div className="terminal-output p-4 mb-5">
+          <div
+            ref={containerRef}
+            className="h-48 overflow-y-auto"
+          >
+            {/* Welcome message */}
+            <div className="mb-4 pb-3 border-b border-gray-300">
+              <p className="font-semibold text-text-primary">KUALITEE FEEDBACK INTERFACE INITIALIZED</p>
+              <p className="text-text-secondary text-sm mt-1">
+                Ask questions about your evaluation results in natural language.
+              </p>
+            </div>
+
+            {/* Chat history */}
+            {terminalHistory.map((entry, index) => (
+              <div key={`history-${index}`} className="mb-3 whitespace-pre-wrap">
+                {entry.startsWith('You:') ? (
+                  <span className="font-semibold" style={{ color: '#084999' }}>{entry}</span>
+                ) : (
+                  <span className="text-text-primary">{entry}</span>
+                )}
+              </div>
+            ))}
+
+            {/* Processing indicator */}
+            {isProcessing && (
+              <div className="text-text-secondary animate-pulse">
+                Processing query...
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
 
-      {/* Terminal Input */}
-      <form onSubmit={handleSubmit} className="border-t border-matrix-green p-2">
-        <div className="flex items-center">
-          <span className="text-matrix-green mr-2">C:\USER\KUALITEE&gt;</span>
+        {/* Input Area */}
+        <form onSubmit={handleSubmit} className="flex gap-3">
           <input
             ref={inputRef}
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            className="flex-1 bg-transparent border-none outline-none text-matrix-green cursor-blink"
+            className="text-input flex-1"
             placeholder={isProcessing ? 'Processing...' : 'Ask a question about your results...'}
             disabled={isProcessing}
             autoFocus
           />
-        </div>
-      </form>
+          <button
+            type="submit"
+            disabled={isProcessing || !input.trim()}
+            className="send-btn"
+          >
+            Send
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

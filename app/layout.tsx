@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'KUALITEE - Automated LLM QA System',
-  description: 'Industrial-scale LLM evaluation with 90s MS-DOS aesthetics',
+  title: 'Kualitee - Automated LLM QA System v1.0',
+  description: 'Industrial-scale LLM evaluation with a Neo-Retro aesthetic',
 }
 
 export default function RootLayout({
@@ -13,9 +13,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="crt-screen bg-dos-black text-matrix-green font-dos min-h-screen">
-        <div className="scanline-overlay" />
-        <main className="relative z-10 flicker">
+      <body className="min-h-screen" style={{ backgroundColor: '#cec5b4' }}>
+        <main>
           {children}
         </main>
       </body>
