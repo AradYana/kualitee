@@ -2,11 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Ensure page is scrollable */
+html, body {
+  height: auto;
+  min-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 /* CRT Screen Effect */
 .crt-screen {
   position: relative;
   background: #000000;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .crt-screen::before {
