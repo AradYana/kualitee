@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import Anthropic from '@anthropic-ai/sdk';
 import { DataRow, KPI, EvaluationResponse } from '@/lib/types';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 interface EvaluationBatchRequest {
@@ -19,9 +19,9 @@ export async function POST(request: NextRequest) {
     const body: EvaluationBatchRequest = await request.json();
     const { batch, kpis } = body;
 
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json(
-        { error: 'OpenAI API key not configured' },
+        { error: 'Anthropic API key not configured. Add ANTHROPIC_API_KEY to .env.local' },
         { status: 500 }
       );
     }
@@ -34,40 +34,35 @@ export async function POST(request: NextRequest) {
       const prompt = buildEvaluationPrompt(source, target, kpis);
 
       try {
-        const completion = await openai.chat.completions.create({
-          model: 'gpt-4o-mini',
+        const message = await anthropic.messages.create({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 500,
           messages: [
             {
-              role: 'system',
-              content: `You are a strict quality assurance evaluator for LLM outputs. 
-              Evaluate the TARGET output against the SOURCE input based on the provided KPIs.
-              Score each KPI from 1-5:
-              1 = Critical Failure
-              2 = Poor
-              3 = Acceptable  
-              4 = Good
-              5 = Optimal
-              
-              Respond ONLY with valid JSON in this exact format:
-              {
-                "scores": [
-                  {"kpiId": 1, "score": 3, "explanation": "brief explanation"},
-                  {"kpiId": 2, "score": 4, "explanation": "brief explanation"},
-                  {"kpiId": 3, "score": 2, "explanation": "brief explanation"},
-                  {"kpiId": 4, "score": 5, "explanation": "brief explanation"}
-                ]
-              }`,
-            },
-            {
               role: 'user',
-              content: prompt,
+              content: `You are a strict quality assurance evaluator for LLM outputs. 
+Evaluate the TARGET output against the SOURCE input based on the provided KPIs.
+Score each KPI from 1-5:
+1 = Critical Failure
+2 = Poor
+3 = Acceptable  
+4 = Good
+5 = Optimal
+
+Respond ONLY with valid JSON in this exact format (no other text):
+{
+  "scores": [
+    {"kpiId": 1, "score": 3, "explanation": "brief explanation"},
+    {"kpiId": 2, "score": 4, "explanation": "brief explanation"}
+  ]
+}
+
+${prompt}`,
             },
           ],
-          temperature: 0.3,
-          max_tokens: 500,
         });
 
-        const responseText = completion.choices[0]?.message?.content || '';
+        const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
         
         // Parse JSON response
         const jsonMatch = responseText.match(/\{[\s\S]*\}/);
@@ -146,51 +141,49 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { source, target, kpis, msid, userFeedback } = body;
 
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json(
-        { error: 'OpenAI API key not configured' },
+        { error: 'Anthropic API key not configured' },
         { status: 500 }
       );
     }
 
     const prompt = buildEvaluationPrompt(source, target, kpis);
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 500,
       messages: [
         {
-          role: 'system',
-          content: `You are a strict quality assurance evaluator for LLM outputs.
-          The user has provided feedback indicating your previous evaluation may have been incorrect.
-          Re-evaluate carefully, taking their feedback into account.
-          
-          Score each KPI from 1-5:
-          1 = Critical Failure
-          2 = Poor
-          3 = Acceptable  
-          4 = Good
-          5 = Optimal
-          
-          Respond ONLY with valid JSON in this exact format:
-          {
-            "scores": [
-              {"kpiId": 1, "score": 3, "explanation": "brief explanation"},
-              {"kpiId": 2, "score": 4, "explanation": "brief explanation"},
-              {"kpiId": 3, "score": 2, "explanation": "brief explanation"},
-              {"kpiId": 4, "score": 5, "explanation": "brief explanation"}
-            ]
-          }`,
-        },
-        {
           role: 'user',
-          content: `${prompt}\n\nUSER FEEDBACK FOR RECONSIDERATION:\n${userFeedback}`,
+          content: `You are a strict quality assurance evaluator for LLM outputs.
+The user has provided feedback indicating your previous evaluation may have been incorrect.
+Re-evaluate carefully, taking their feedback into account.
+
+Score each KPI from 1-5:
+1 = Critical Failure
+2 = Poor
+3 = Acceptable  
+4 = Good
+5 = Optimal
+
+Respond ONLY with valid JSON in this exact format (no other text):
+{
+  "scores": [
+    {"kpiId": 1, "score": 3, "explanation": "brief explanation"},
+    {"kpiId": 2, "score": 4, "explanation": "brief explanation"}
+  ]
+}
+
+${prompt}
+
+USER FEEDBACK FOR RECONSIDERATION:
+${userFeedback}`,
         },
       ],
-      temperature: 0.3,
-      max_tokens: 500,
     });
 
-    const responseText = completion.choices[0]?.message?.content || '';
+    const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     
     if (!jsonMatch) {

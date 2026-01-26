@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import Anthropic from '@anthropic-ai/sdk';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { query, evaluationResults, kpis, mergedData } = body;
+    const { query, evaluationResults, kpis } = body;
 
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json(
-        { error: 'OpenAI API key not configured' },
+        { error: 'Anthropic API key not configured. Add ANTHROPIC_API_KEY to .env.local' },
         { status: 500 }
       );
     }
@@ -47,11 +47,12 @@ export async function POST(request: NextRequest) {
       .map((kpi: any) => `KPI_${kpi.id} Average: ${avgScores[kpi.id].toFixed(2)}`)
       .join(', ');
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
       messages: [
         {
-          role: 'system',
+          role: 'user',
           content: `You are KUALITEE, an AI assistant for analyzing LLM evaluation results.
 You have access to evaluation data and can answer questions about it.
 Respond in a concise, terminal-style format. Use plain text, no markdown.
@@ -68,18 +69,14 @@ ${kpiContext}
 SAMPLE EVALUATION RESULTS:
 ${resultsContext}
 
-Answer the user's question based on this data. If asked to filter or find specific MSIDs, search through the results and list matching ones.`,
-        },
-        {
-          role: 'user',
-          content: query,
+Answer the user's question based on this data. If asked to filter or find specific MSIDs, search through the results and list matching ones.
+
+USER QUESTION: ${query}`,
         },
       ],
-      temperature: 0.3,
-      max_tokens: 1000,
     });
 
-    const response = completion.choices[0]?.message?.content || 'No response generated';
+    const response = message.content[0].type === 'text' ? message.content[0].text : 'No response generated';
 
     return NextResponse.json({ response });
   } catch (error) {

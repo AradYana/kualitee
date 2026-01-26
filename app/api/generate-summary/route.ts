@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import Anthropic from '@anthropic-ai/sdk';
 import { EvaluationResult, KPI, EvaluationSummary } from '@/lib/types';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 interface SummaryRequest {
@@ -35,8 +35,8 @@ export async function POST(request: NextRequest) {
       };
     });
 
-    // Generate short explanations using LLM
-    if (process.env.OPENAI_API_KEY) {
+    // Generate short explanations using Claude
+    if (process.env.ANTHROPIC_API_KEY) {
       const prompt = `
 Based on these KPI evaluation results, provide a brief 1-sentence explanation for each:
 
@@ -45,32 +45,26 @@ ${summaries.map((s) => `${s.kpiName} (${s.shortName}): Average Score ${s.average
 KPI Definitions:
 ${kpis.map((k) => `${k.name}: ${k.description}`).join('\n')}
 
-Respond with JSON array of explanations:
+Respond with ONLY a JSON array of explanations (no other text):
 [
   {"kpiId": 1, "explanation": "brief explanation"},
-  {"kpiId": 2, "explanation": "brief explanation"},
-  ...
+  {"kpiId": 2, "explanation": "brief explanation"}
 ]
 `;
 
       try {
-        const completion = await openai.chat.completions.create({
-          model: 'gpt-4o-mini',
+        const message = await anthropic.messages.create({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 500,
           messages: [
             {
-              role: 'system',
-              content: 'Generate brief, terminal-style explanations for KPI performance. Be concise and technical.',
-            },
-            {
               role: 'user',
-              content: prompt,
+              content: `Generate brief, terminal-style explanations for KPI performance. Be concise and technical.\n\n${prompt}`,
             },
           ],
-          temperature: 0.5,
-          max_tokens: 500,
         });
 
-        const responseText = completion.choices[0]?.message?.content || '';
+        const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
         const jsonMatch = responseText.match(/\[[\s\S]*\]/);
 
         if (jsonMatch) {

@@ -104,15 +104,17 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
         <div className="text-warning-amber text-sm">
           This usually means:
           <br />
-          1. OpenAI API key is not configured in .env.local
+          1. Anthropic API key is not configured in .env.local
           <br />
           2. The API request failed
           <br />
           <br />
-          Please add your OpenAI API key to the .env.local file:
+          Please add your Anthropic API key to the .env.local file:
           <br />
-          <code className="text-matrix-green">OPENAI_API_KEY=sk-your-key-here</code>
+          <code className="text-matrix-green">ANTHROPIC_API_KEY=sk-ant-your-key-here</code>
           <br />
+          <br />
+          Get your key at: https://console.anthropic.com/
           <br />
           Then restart the development server.
         </div>
