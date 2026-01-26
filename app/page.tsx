@@ -388,6 +388,10 @@ export default function Home() {
               ┌─── DATA UPLOAD INTERFACE ───┐
             </div>
 
+            <div className="text-matrix-green/60 text-sm mb-4">
+              The key column connecting the 2 CSVs is called MSID, make sure to have it in your CSV.
+            </div>
+
             <div className="grid md:grid-cols-2 gap-6">
               <FileUpload
                 label="SOURCE_INPUT"
