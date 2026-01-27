@@ -11,10 +11,25 @@ export default function KPIConfig({ onComplete }: KPIConfigProps) {
   const { kpis, updateKPI, addLog, setKPIs } = useAppStore();
   const [currentKPIIndex, setCurrentKPIIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [isCompleting, setIsCompleting] = useState(false);
 
   const currentKPI = kpis[currentKPIIndex];
   const isFirstKPI = currentKPIIndex === 0;
   const isLastKPI = currentKPIIndex === 3;
+
+  // Guard: if we're in completing state or currentKPI doesn't exist, don't render
+  if (isCompleting || !currentKPI) {
+    return (
+      <div className="terminal-window overflow-hidden">
+        <div className="title-bar">
+          <span>⚙️ KPI Configuration</span>
+        </div>
+        <div className="p-5 text-center" style={{ backgroundColor: '#e6e0d4' }}>
+          <p className="text-text-primary">Starting evaluation...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleNameChange = (name: string) => {
     updateKPI(currentKPI.id, { name });
@@ -50,6 +65,9 @@ export default function KPIConfig({ onComplete }: KPIConfigProps) {
     addLog('INFO', `KPI ${currentKPI.id}: ${currentKPI.name} [${currentKPI.shortName}] configured`);
 
     if (isLastKPI) {
+      // Set completing state FIRST to prevent re-render issues
+      setIsCompleting(true);
+      
       const configuredKPIs = kpis.filter(
         kpi => kpi.name.trim() && kpi.description.trim()
       );
@@ -72,6 +90,9 @@ export default function KPIConfig({ onComplete }: KPIConfigProps) {
       return;
     }
 
+    // Set completing state FIRST to prevent re-render issues
+    setIsCompleting(true);
+    
     setKPIs(configuredKPIs);
     addLog('SUCCESS', `KPI configuration completed with ${configuredKPIs.length} KPI(s)`);
     onComplete();
