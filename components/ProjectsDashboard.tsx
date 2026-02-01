@@ -104,17 +104,16 @@ export default function ProjectsDashboard({ isCreateModalOpen, onOpenCreateModal
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Calculate mock overall score (in real app, this comes from API)
-  const getOverallScore = (project: Project) => {
+  // Get overall score from API data (calculated from actual test results)
+  const getOverallScore = (project: Project & { overallScore?: number | null }) => {
     if (!project.kpis || project.kpis.length === 0) return null;
-    // Mock score for demo - in production this would come from actual test results
-    return 4.4;
+    return project.overallScore ?? null;
   };
 
-  const getKPIScore = (kpiIndex: number) => {
-    // Mock scores for demo
-    const scores = [4.6, 4.6, 4.0, 4.5];
-    return scores[kpiIndex] || 4.0;
+  // Get KPI score from API data
+  const getKPIScore = (project: Project & { kpiAverages?: { [key: string]: number | null } }, kpi: { shortName: string }) => {
+    if (!project.kpiAverages) return null;
+    return project.kpiAverages[kpi.shortName] ?? null;
   };
 
   return (
@@ -200,7 +199,7 @@ export default function ProjectsDashboard({ isCreateModalOpen, onOpenCreateModal
           <div className="projects-grid">
             {filteredProjects.map((project) => {
               const needsSetup = !project.isConfigured || !project.kpis || project.kpis.length === 0;
-              const overallScore = getOverallScore(project);
+              const overallScore = getOverallScore(project as Project & { overallScore?: number | null });
               
               return (
                 <div
@@ -242,7 +241,7 @@ export default function ProjectsDashboard({ isCreateModalOpen, onOpenCreateModal
                       {/* Score */}
                       <div className="project-card-score">
                         <div className="score-value">
-                          {overallScore?.toFixed(1) || '—'}
+                          {overallScore !== null ? overallScore.toFixed(1) : '—'}
                           <span className="score-max">/ 5.0</span>
                         </div>
                         <p className="score-label">Overall Score</p>
@@ -251,14 +250,14 @@ export default function ProjectsDashboard({ isCreateModalOpen, onOpenCreateModal
                       {/* KPI Grid */}
                       {project.kpis && project.kpis.length > 0 && (
                         <div className="kpi-grid">
-                          {project.kpis.slice(0, 4).map((kpi, index) => {
-                            const score = getKPIScore(index);
-                            const percentage = (score / 5) * 100;
+                          {project.kpis.slice(0, 4).map((kpi) => {
+                            const score = getKPIScore(project as Project & { kpiAverages?: { [key: string]: number | null } }, kpi);
+                            const percentage = score !== null ? (score / 5) * 100 : 0;
                             return (
                               <div key={kpi.id} className="kpi-item">
                                 <div className="kpi-header">
                                   <span className="kpi-label">{kpi.name}</span>
-                                  <span className="kpi-value">{score.toFixed(1)}</span>
+                                  <span className="kpi-value">{score !== null ? score.toFixed(1) : '—'}</span>
                                 </div>
                                 <div className="kpi-bar">
                                   <div 

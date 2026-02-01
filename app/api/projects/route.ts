@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-// GET /api/projects - List all projects with latest test set info
+// GET /api/projects - List all projects with latest test set info and scores
 export async function GET() {
   try {
     const projects = await prisma.project.findMany({
@@ -11,11 +11,8 @@ export async function GET() {
         },
         testSets: {
           orderBy: { createdAt: 'desc' },
-          take: 1,
-          select: {
-            id: true,
-            name: true,
-            createdAt: true,
+          include: {
+            results: true,
           },
         },
         _count: {
@@ -25,20 +22,77 @@ export async function GET() {
       orderBy: { updatedAt: 'desc' },
     });
 
-    // Transform to include lastRunDate and config status
-    const transformedProjects = projects.map((project) => ({
-      id: project.id,
-      name: project.name,
-      description: project.description,
-      siteDescription: project.siteDescription,
-      targetLanguage: project.targetLanguage,
-      isConfigured: project.isConfigured,
-      createdAt: project.createdAt,
-      updatedAt: project.updatedAt,
-      kpis: project.kpis,
-      testSetCount: project._count.testSets,
-      lastTestSet: project.testSets[0] || null,
-    }));
+    // Transform to include lastRunDate, config status, and calculated scores
+    const transformedProjects = projects.map((project) => {
+      // Calculate average scores from all test results across all test sets
+      let totalScore = 0;
+      let scoreCount = 0;
+      const kpiScores: { [key: string]: { total: number; count: number } } = {};
+
+      // Initialize KPI score trackers
+      project.kpis.forEach((kpi) => {
+        kpiScores[kpi.shortName] = { total: 0, count: 0 };
+      });
+
+      // Process all test sets and their results
+      project.testSets.forEach((testSet) => {
+        testSet.results.forEach((result) => {
+          try {
+            const scores = JSON.parse(result.scores) as Array<{
+              kpiId?: string;
+              kpiKey?: string;
+              shortName?: string;
+              score: number;
+            }>;
+            scores.forEach((scoreEntry) => {
+              if (typeof scoreEntry.score === 'number' && !isNaN(scoreEntry.score)) {
+                totalScore += scoreEntry.score;
+                scoreCount++;
+
+                // Track per-KPI scores
+                const kpiKey = scoreEntry.kpiKey || scoreEntry.shortName || scoreEntry.kpiId;
+                if (kpiKey && kpiScores[kpiKey]) {
+                  kpiScores[kpiKey].total += scoreEntry.score;
+                  kpiScores[kpiKey].count++;
+                }
+              }
+            });
+          } catch {
+            // Skip invalid JSON
+          }
+        });
+      });
+
+      // Calculate averages
+      const overallScore = scoreCount > 0 ? totalScore / scoreCount : null;
+      const kpiAverages: { [key: string]: number | null } = {};
+      Object.keys(kpiScores).forEach((key) => {
+        kpiAverages[key] = kpiScores[key].count > 0
+          ? kpiScores[key].total / kpiScores[key].count
+          : null;
+      });
+
+      return {
+        id: project.id,
+        name: project.name,
+        description: project.description,
+        siteDescription: project.siteDescription,
+        targetLanguage: project.targetLanguage,
+        isConfigured: project.isConfigured,
+        createdAt: project.createdAt,
+        updatedAt: project.updatedAt,
+        kpis: project.kpis,
+        testSetCount: project._count.testSets,
+        lastTestSet: project.testSets[0] ? {
+          id: project.testSets[0].id,
+          name: project.testSets[0].name,
+          createdAt: project.testSets[0].createdAt,
+        } : null,
+        // Add calculated scores
+        overallScore,
+        kpiAverages,
+      };
+    });
 
     return NextResponse.json({ projects: transformedProjects });
   } catch (error) {
