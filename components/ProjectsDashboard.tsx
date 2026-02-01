@@ -276,36 +276,25 @@ export default function ProjectsDashboard({ isCreateModalOpen, onOpenCreateModal
             })}
           </div>
 
-          {/* Bottom Actions Bar */}
-          <div className="bulk-actions-bar">
-            <div className="flex items-center gap-4">
-              <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-                <input type="checkbox" className="w-4 h-4 rounded" />
-                Select All
-              </label>
-              <button className="btn-secondary text-sm py-2 px-4">
-                <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Download Selected
-              </button>
+          {/* Pagination - only show if more than 20 projects */}
+          {filteredProjects.length > 20 && (
+            <div className="flex justify-center mt-8">
+              <div className="pagination">
+                <span className="pagination-text">Page 1 of {Math.ceil(filteredProjects.length / 20)}</span>
+                <button className="pagination-btn">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button className="pagination-btn active">1</button>
+                <button className="pagination-btn">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
             </div>
-            
-            <div className="pagination">
-              <span className="pagination-text">Page 1 of 1</span>
-              <button className="pagination-btn">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button className="pagination-btn active">1</button>
-              <button className="pagination-btn">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          </div>
+          )}
         </>
       )}
     </div>
