@@ -24,6 +24,7 @@ export default function Home() {
     setMergedData,
     mergedData,
     kpis,
+    setKPIs,
     currentPhase,
     currentScreen,
     currentProject,
@@ -45,6 +46,9 @@ export default function Home() {
     goToProjectHub,
     setCurrentTestSet,
   } = useAppStore();
+  
+  // Track if we should skip KPI config (when project already has KPIs)
+  const [shouldAutoEvaluate, setShouldAutoEvaluate] = useState(false);
 
   const [showFailuresOnly, setShowFailuresOnly] = useState(false);
   const [isTerminalProcessing, setIsTerminalProcessing] = useState(false);
@@ -124,9 +128,24 @@ export default function Home() {
 
     setMergedData(merged);
     addLog('SUCCESS', `Data validation complete. ${merged.length} records merged successfully.`);
-    setPhase('KPI_CONFIG');
-    setScreen('KPI_CONFIG');
-  }, [sourceData, targetData, setMergedData, setValidationError, setPhase, setScreen, addLog, addDataMismatch]);
+    
+    // Check if project already has KPIs configured - skip KPI config if so
+    if (currentProject?.kpis && currentProject.kpis.length > 0) {
+      // Map project KPIs to the expected format and set them
+      const projectKPIs = currentProject.kpis.map((kpi: any) => ({
+        id: kpi.kpiNumber || kpi.id,
+        name: kpi.name,
+        description: kpi.description,
+        shortName: kpi.shortName,
+      }));
+      setKPIs(projectKPIs);
+      addLog('INFO', `Using ${projectKPIs.length} existing project KPI(s)`);
+      setShouldAutoEvaluate(true);
+    } else {
+      setPhase('KPI_CONFIG');
+      setScreen('KPI_CONFIG');
+    }
+  }, [sourceData, targetData, setMergedData, setValidationError, setPhase, setScreen, addLog, addDataMismatch, currentProject, setKPIs]);
 
   const handleUploadError = (message: string) => {
     const error: ValidationError = {
@@ -267,6 +286,14 @@ export default function Home() {
     setPhase('RESULTS');
     setScreen('RESULTS');
   }, [mergedData, kpis, currentProject, setPhase, setScreen, setLoading, setEvaluationResults, setEvaluationSummary, addLog, setCurrentTestSet]);
+
+  // Auto-run evaluation when project has KPIs and data is ready
+  useEffect(() => {
+    if (shouldAutoEvaluate && mergedData && mergedData.length > 0 && kpis.length > 0) {
+      setShouldAutoEvaluate(false);
+      runEvaluation();
+    }
+  }, [shouldAutoEvaluate, mergedData, kpis, runEvaluation]);
 
   const handleTerminalQuery = useCallback(async (query: string) => {
     if (!evaluationResults || evaluationResults.length === 0) {
