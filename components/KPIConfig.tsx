@@ -40,12 +40,18 @@ export default function KPIConfig({ onComplete }: KPIConfigProps) {
   // Guard: if we're in completing state or currentKPI doesn't exist, don't render
   if (isCompleting || !currentKPI) {
     return (
-      <div className="terminal-window overflow-hidden">
-        <div className="title-bar">
-          <span>⚙️ KPI Configuration</span>
+      <div className="card overflow-hidden">
+        <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600">
+          <h2 className="text-lg font-semibold text-white">KPI Configuration</h2>
         </div>
-        <div className="p-5 text-center" style={{ backgroundColor: '#e6e0d4' }}>
-          <p className="text-text-primary">Starting evaluation...</p>
+        <div className="p-8 text-center">
+          <div className="flex items-center justify-center gap-3">
+            <svg className="w-6 h-6 animate-spin text-purple-600" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p className="text-slate-600 font-medium">Starting evaluation...</p>
+          </div>
         </div>
       </div>
     );
@@ -123,118 +129,157 @@ export default function KPIConfig({ onComplete }: KPIConfigProps) {
   ).length;
 
   return (
-    <div className="terminal-window overflow-hidden">
-      <div className="title-bar">
-        <span>⚙️ KPI Configuration</span>
-        <div className="title-bar-controls">
-          <button className="title-bar-btn">─</button>
-          <button className="title-bar-btn">□</button>
-          <button className="title-bar-btn">×</button>
-        </div>
+    <div className="card overflow-hidden">
+      {/* Header */}
+      <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600">
+        <h2 className="text-lg font-semibold text-white">KPI Configuration</h2>
+        <p className="text-sm text-white/70">Step {currentKPIIndex + 1} of 4</p>
       </div>
 
-      <div className="p-5" style={{ backgroundColor: '#e6e0d4' }}>
+      <div className="p-6">
         {/* Pre-filled KPIs from Project - Quick Confirm */}
         {hasPrefilledKPIs && currentKPIIndex === 0 && (
-          <div className="terminal-output p-4 mb-4 border-2" style={{ borderColor: '#084999' }}>
-            <div className="text-sm font-semibold text-text-primary mb-2">
-              📋 Project KPIs Available
+          <div className="bg-purple-50 border border-purple-200 rounded-xl p-5 mb-6">
+            <div className="flex items-start gap-3 mb-3">
+              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-slate-800">Project KPIs Available</h3>
+                <p className="text-sm text-slate-600">
+                  This project has {prefilledKPIs.length} KPI(s) configured. You can use them directly or customize below.
+                </p>
+              </div>
             </div>
-            <p className="text-sm text-text-secondary mb-3">
-              This project has {prefilledKPIs.length} KPI(s) configured. You can use them directly or customize below.
-            </p>
-            <div className="space-y-2 mb-4">
+            
+            <div className="flex flex-wrap gap-2 mb-4">
               {prefilledKPIs.map((kpi) => (
-                <div key={kpi.id} className="text-sm">
-                  <span className="suggestion-chip text-xs mr-2">{kpi.shortName}</span>
-                  <span className="text-text-primary">{kpi.name}</span>
+                <div key={kpi.id} className="inline-flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-purple-200">
+                  <span className="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-0.5 rounded">
+                    {kpi.shortName}
+                  </span>
+                  <span className="text-sm text-slate-700">{kpi.name}</span>
                 </div>
               ))}
             </div>
-            <button onClick={handleUseProjectKPIs} className="send-btn w-full">
-              ✓ Use Project KPIs & Start Evaluation
+            
+            <button onClick={handleUseProjectKPIs} className="btn-primary w-full">
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Use Project KPIs & Start Evaluation
             </button>
-            <p className="text-xs text-text-secondary mt-2 text-center">
+            <p className="text-xs text-slate-500 mt-3 text-center">
               Or customize KPIs below
             </p>
           </div>
         )}
 
-        <div className="text-sm text-text-secondary mb-4">
-          Define Key Performance Indicators for evaluation.
-          <br />
-          Describe what constitutes &quot;Good&quot; vs &quot;Bad&quot; for each metric.
-          <br />
-          Scoring: 1 (Critical Failure) to 5 (Optimal)
+        {/* Progress Indicator */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-slate-600">Progress</span>
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-sm font-medium">
+              KPI {currentKPIIndex + 1} of 4
+              {configuredCount > 0 && ` • ${configuredCount} configured`}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            {[0, 1, 2, 3].map((idx) => (
+              <div
+                key={idx}
+                className={`h-2 flex-1 rounded-full transition-colors ${
+                  idx < currentKPIIndex
+                    ? 'bg-green-500'
+                    : idx === currentKPIIndex
+                    ? 'bg-purple-600'
+                    : 'bg-slate-200'
+                }`}
+              />
+            ))}
+          </div>
         </div>
 
-        <div className="suggestion-chip inline-block mb-4">
-          Progress: KPI {currentKPIIndex + 1} of 4 
-          {configuredCount > 0 && ` (${configuredCount} configured)`}
-        </div>
-
-        <div className="terminal-output p-4 mb-4">
-          <div className="text-sm font-semibold text-text-primary mb-3">
-            KPI #{currentKPI.id} {currentKPI.shortName && `[${currentKPI.shortName}]`}
+        {/* KPI Form */}
+        <div className="bg-slate-50 rounded-xl p-5 border border-slate-100 mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-sm font-semibold text-slate-800">KPI #{currentKPI.id}</span>
+            {currentKPI.shortName && (
+              <span className="text-xs font-medium text-purple-600 bg-purple-100 px-2 py-0.5 rounded">
+                {currentKPI.shortName}
+              </span>
+            )}
           </div>
 
-          <div className="mb-3">
-            <label className="block text-sm text-text-secondary mb-1">
-              Name:
-            </label>
-            <input
-              type="text"
-              value={currentKPI.name}
-              onChange={(e) => handleNameChange(e.target.value)}
-              placeholder="e.g., Accuracy, Relevance, Tone..."
-              className="text-input w-full"
-            />
-          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="input-label">KPI Name *</label>
+              <input
+                type="text"
+                value={currentKPI.name}
+                onChange={(e) => handleNameChange(e.target.value)}
+                placeholder="e.g., Accuracy, Relevance, Tone, Completeness..."
+                className="input-field"
+              />
+            </div>
 
-          <div className="mb-2">
-            <label className="block text-sm text-text-secondary mb-1">
-              Description (Define Good vs Bad):
-            </label>
-            <textarea
-              value={currentKPI.description}
-              onChange={(e) => handleDescriptionChange(e.target.value)}
-              placeholder="e.g., Good: Response directly answers the question with factual accuracy. Bad: Response contains incorrect information or misses the point entirely."
-              rows={3}
-              className="text-input w-full resize-none"
-            />
+            <div>
+              <label className="input-label">Description (Good vs Bad) *</label>
+              <textarea
+                value={currentKPI.description}
+                onChange={(e) => handleDescriptionChange(e.target.value)}
+                placeholder="e.g., Good: Response directly answers the question with factual accuracy. Bad: Response contains incorrect information or misses the point entirely."
+                rows={3}
+                className="input-field resize-none"
+              />
+            </div>
           </div>
 
           {error && (
-            <div className="text-sm mt-2" style={{ color: '#CC0000' }}>
-              ⚠️ {error}
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex items-center gap-2">
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {error}
             </div>
           )}
         </div>
 
+        {/* Actions */}
         <div className="flex justify-center gap-3">
-          <button onClick={handleConfirm} className="send-btn">
-            {isLastKPI ? 'Confirm & Start Evaluation' : 'Confirm KPI & Continue'}
+          <button onClick={handleConfirm} className="btn-primary">
+            {isLastKPI ? 'Confirm & Start Evaluation' : 'Confirm & Continue'}
+            <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </button>
           
           {!isFirstKPI && (
-            <button onClick={handleSkip} className="send-btn" style={{ backgroundColor: '#808080' }}>
-              Skip Remaining & Start
+            <button onClick={handleSkip} className="btn-secondary">
+              Skip & Start Evaluation
             </button>
           )}
         </div>
 
-        {currentKPIIndex > 0 && (
-          <div className="mt-4 pt-4 border-t border-border-gray">
-            <div className="text-sm text-text-secondary mb-2">
-              Configured KPIs:
+        {/* Previously configured KPIs */}
+        {currentKPIIndex > 0 && configuredCount > 0 && (
+          <div className="mt-6 pt-6 border-t border-slate-200">
+            <p className="text-sm font-medium text-slate-600 mb-3">Configured KPIs:</p>
+            <div className="flex flex-wrap gap-2">
+              {kpis.slice(0, currentKPIIndex).map((kpi) => (
+                kpi.name.trim() && (
+                  <div key={kpi.id} className="inline-flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+                    <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="text-sm text-slate-700">{kpi.name}</span>
+                    <span className="text-xs text-green-600 font-medium">[{kpi.shortName}]</span>
+                  </div>
+                )
+              ))}
             </div>
-            {kpis.slice(0, currentKPIIndex).map((kpi) => (
-              kpi.name.trim() && (
-                <div key={kpi.id} className="text-sm text-text-primary ml-2">
-                  • KPI {kpi.id}: {kpi.name} [{kpi.shortName}]
-                </div>
-              )
-            ))}
           </div>
         )}
       </div>
