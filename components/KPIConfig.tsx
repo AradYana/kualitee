@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
 
 interface KPIConfigProps {
@@ -8,7 +8,7 @@ interface KPIConfigProps {
 }
 
 export default function KPIConfig({ onComplete }: KPIConfigProps) {
-  const { kpis, updateKPI, addLog, setKPIs } = useAppStore();
+  const { kpis, updateKPI, addLog, setKPIs, currentProject } = useAppStore();
   const [currentKPIIndex, setCurrentKPIIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
@@ -16,6 +16,26 @@ export default function KPIConfig({ onComplete }: KPIConfigProps) {
   const currentKPI = kpis[currentKPIIndex];
   const isFirstKPI = currentKPIIndex === 0;
   const isLastKPI = currentKPIIndex === 3;
+
+  // Check if KPIs are pre-filled from project
+  const prefilledKPIs = useMemo(() => {
+    return kpis.filter(k => k.name.trim() && k.description.trim());
+  }, [kpis]);
+  
+  const hasPrefilledKPIs = prefilledKPIs.length > 0 && currentProject;
+
+  // Quick confirm all pre-filled KPIs
+  const handleUseProjectKPIs = () => {
+    if (prefilledKPIs.length === 0) {
+      setError('No KPIs configured for this project');
+      return;
+    }
+    
+    setIsCompleting(true);
+    setKPIs(prefilledKPIs);
+    addLog('SUCCESS', `Using ${prefilledKPIs.length} project KPI(s)`);
+    onComplete();
+  };
 
   // Guard: if we're in completing state or currentKPI doesn't exist, don't render
   if (isCompleting || !currentKPI) {
@@ -114,10 +134,36 @@ export default function KPIConfig({ onComplete }: KPIConfigProps) {
       </div>
 
       <div className="p-5" style={{ backgroundColor: '#e6e0d4' }}>
+        {/* Pre-filled KPIs from Project - Quick Confirm */}
+        {hasPrefilledKPIs && currentKPIIndex === 0 && (
+          <div className="terminal-output p-4 mb-4 border-2" style={{ borderColor: '#084999' }}>
+            <div className="text-sm font-semibold text-text-primary mb-2">
+              📋 Project KPIs Available
+            </div>
+            <p className="text-sm text-text-secondary mb-3">
+              This project has {prefilledKPIs.length} KPI(s) configured. You can use them directly or customize below.
+            </p>
+            <div className="space-y-2 mb-4">
+              {prefilledKPIs.map((kpi) => (
+                <div key={kpi.id} className="text-sm">
+                  <span className="suggestion-chip text-xs mr-2">{kpi.shortName}</span>
+                  <span className="text-text-primary">{kpi.name}</span>
+                </div>
+              ))}
+            </div>
+            <button onClick={handleUseProjectKPIs} className="send-btn w-full">
+              ✓ Use Project KPIs & Start Evaluation
+            </button>
+            <p className="text-xs text-text-secondary mt-2 text-center">
+              Or customize KPIs below
+            </p>
+          </div>
+        )}
+
         <div className="text-sm text-text-secondary mb-4">
           Define Key Performance Indicators for evaluation.
           <br />
-          Describe what constitutes "Good" vs "Bad" for each metric.
+          Describe what constitutes &quot;Good&quot; vs &quot;Bad&quot; for each metric.
           <br />
           Scoring: 1 (Critical Failure) to 5 (Optimal)
         </div>

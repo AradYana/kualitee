@@ -8,12 +8,31 @@ interface ResultsDisplayProps {
 }
 
 export default function ResultsDisplay({ filterFailures = false }: ResultsDisplayProps) {
-  const { evaluationResults, kpis, dataMismatchLog } = useAppStore();
+  const { evaluationResults, kpis, dataMismatchLog, currentTestSet } = useAppStore();
+  
+  // Use KPIs from test set if available (for historical views), otherwise use current
+  const activeKPIs = useMemo(() => {
+    if (currentTestSet?.kpis && currentTestSet.kpis.length > 0) {
+      return currentTestSet.kpis;
+    }
+    return kpis;
+  }, [currentTestSet, kpis]);
+
+  // Use data mismatches from test set if available
+  const activeMismatches = useMemo(() => {
+    if (currentTestSet?.dataMismatches && currentTestSet.dataMismatches.length > 0) {
+      return currentTestSet.dataMismatches.map((m, i) => ({
+        msid: m.msid,
+        field: m.field,
+      }));
+    }
+    return dataMismatchLog;
+  }, [currentTestSet, dataMismatchLog]);
 
   const summaryStats = useMemo(() => {
     if (!evaluationResults || evaluationResults.length === 0) return [];
 
-    return kpis.map((kpi) => {
+    return activeKPIs.map((kpi) => {
       const scores = evaluationResults
         .flatMap((r) => r.scores.filter((s: any) => s.kpiId === kpi.id))
         .map((s: any) => s.score)
@@ -30,7 +49,7 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
 
       return { kpiId: kpi.id, kpiName: kpi.name, shortName: kpi.shortName, mean, median, count: scores.length };
     });
-  }, [evaluationResults, kpis]);
+  }, [evaluationResults, activeKPIs]);
 
   const detailedResults = useMemo(() => {
     if (!evaluationResults) return [];
@@ -39,7 +58,7 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
       const kpiScores: Record<string, { score: number; justification: string }> = {};
       
       result.scores.forEach((score: any) => {
-        const kpi = kpis.find(k => k.id === score.kpiId);
+        const kpi = activeKPIs.find(k => k.id === score.kpiId);
         const kpiKey = kpi?.shortName || `KPI_${score.kpiId}`;
         kpiScores[kpiKey] = { score: score.score, justification: score.explanation };
       });
@@ -52,13 +71,13 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
     }
 
     return results;
-  }, [evaluationResults, kpis, filterFailures]);
+  }, [evaluationResults, activeKPIs, filterFailures]);
 
   const systemLogs = useMemo(() => {
-    return dataMismatchLog.map((mismatch, index) => ({
+    return activeMismatches.map((mismatch, index) => ({
       id: index + 1, type: 'DATA_MISMATCH', msid: mismatch.msid, field: mismatch.field, message: 'Empty cell detected',
     }));
-  }, [dataMismatchLog]);
+  }, [activeMismatches]);
 
   if (!evaluationResults || evaluationResults.length === 0) {
     return (
@@ -175,7 +194,7 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
                 <thead className="sticky top-0">
                   <tr>
                     <th>MSID</th>
-                    {kpis.map((kpi) => (
+                    {activeKPIs.map((kpi) => (
                       <th key={kpi.id}>{kpi.shortName || `KPI_${kpi.id}`}</th>
                     ))}
                   </tr>
@@ -184,7 +203,7 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
                   {detailedResults.map((result: any) => (
                     <tr key={result.msid}>
                       <td className="font-mono font-bold">{result.msid}</td>
-                      {kpis.map((kpi) => {
+                      {activeKPIs.map((kpi) => {
                         const kpiKey = kpi.shortName || `KPI_${kpi.id}`;
                         const scoreData = result.scores[kpiKey];
                         const score = scoreData?.score || 0;
@@ -214,7 +233,7 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
               {detailedResults.slice(0, 20).map((result: any) => (
                 <div key={result.msid} className="mb-3 text-xs border-b border-gray-200 pb-2">
                   <div className="font-bold" style={{ color: '#084999' }}>MSID: {result.msid}</div>
-                  {kpis.map((kpi) => {
+                  {activeKPIs.map((kpi) => {
                     const kpiKey = kpi.shortName || `KPI_${kpi.id}`;
                     const scoreData = result.scores[kpiKey];
                     return (

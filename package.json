@@ -5,15 +5,19 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "prisma generate",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "next": "^14.0.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "@anthropic-ai/sdk": "^0.39.0",
+    "@prisma/client": "^5.8.0",
     "xlsx": "^0.18.5",
     "papaparse": "^5.4.1",
     "zustand": "^4.4.7"
@@ -28,6 +32,7 @@
     "postcss": "^8.4.32",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.56.0",
-    "eslint-config-next": "^14.0.4"
+    "eslint-config-next": "^14.0.4",
+    "prisma": "^5.8.0"
   }
 }

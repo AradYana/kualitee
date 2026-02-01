@@ -1,0 +1,101 @@
+// Prisma schema for Kualitee - Project-based LLM Evaluation System
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Project - Top level container for evaluation workflows
+model Project {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Project-level default KPIs
+  kpis     ProjectKPI[]
+  testSets TestSet[]
+}
+
+// Project KPIs - Default KPIs for a project (can be overridden per test set)
+model ProjectKPI {
+  id          String  @id @default(cuid())
+  projectId   String
+  kpiNumber   Int     // 1-4, order of the KPI
+  name        String
+  description String  // Good vs Bad definition
+  shortName   String  // Auto-generated short name
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, kpiNumber])
+}
+
+// TestSet - A single evaluation run within a project
+model TestSet {
+  id        String   @id @default(cuid())
+  projectId String
+  name      String   // e.g., "Run #3 - Jan 25"
+  createdAt DateTime @default(now())
+  
+  // Store the KPIs used for this specific test (snapshot of project KPIs at run time)
+  kpisSnapshot String // JSON string of KPIs used
+
+  project      Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sourceRows   SourceRow[]
+  targetRows   TargetRow[]
+  results      TestResult[]
+  dataMismatches DataMismatch[]
+}
+
+// SourceRow - Raw source input data for a test set
+model SourceRow {
+  id        String  @id @default(cuid())
+  testSetId String
+  msid      String
+  data      String  // JSON string of all columns
+
+  testSet TestSet @relation(fields: [testSetId], references: [id], onDelete: Cascade)
+
+  @@unique([testSetId, msid])
+}
+
+// TargetRow - Raw target output data for a test set
+model TargetRow {
+  id        String  @id @default(cuid())
+  testSetId String
+  msid      String
+  data      String  // JSON string of all columns
+
+  testSet TestSet @relation(fields: [testSetId], references: [id], onDelete: Cascade)
+
+  @@unique([testSetId, msid])
+}
+
+// TestResult - Evaluation scores for each MSID in a test set
+model TestResult {
+  id        String @id @default(cuid())
+  testSetId String
+  msid      String
+  scores    String // JSON string: [{ kpiId, score, explanation }]
+
+  testSet TestSet @relation(fields: [testSetId], references: [id], onDelete: Cascade)
+
+  @@unique([testSetId, msid])
+}
+
+// DataMismatch - Log of data integrity issues
+model DataMismatch {
+  id        String @id @default(cuid())
+  testSetId String
+  msid      String
+  field     String
+  issue     String // e.g., "Empty cell", "Missing in target"
+
+  testSet TestSet @relation(fields: [testSetId], references: [id], onDelete: Cascade)
+}
