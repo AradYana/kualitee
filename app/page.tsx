@@ -4,7 +4,6 @@ import { useState, useCallback, useEffect } from 'react';
 import FileUpload from '@/components/FileUpload';
 import KPIConfig from '@/components/KPIConfig';
 import LoadingIndicator from '@/components/LoadingIndicator';
-import ErrorScreen from '@/components/ErrorScreen';
 import ResultsDisplay from '@/components/ResultsDisplay';
 import Terminal from '@/components/Terminal';
 import ProjectsDashboard from '@/components/ProjectsDashboard';
@@ -34,8 +33,6 @@ export default function Home() {
     isLoading,
     loadingMessage,
     setLoading,
-    validationError,
-    setValidationError,
     addLog,
     addDataMismatch,
     setEvaluationResults,
@@ -57,6 +54,7 @@ export default function Home() {
   // Track file upload errors
   const [sourceFileError, setSourceFileError] = useState(false);
   const [targetFileError, setTargetFileError] = useState(false);
+  const [inlineValidationError, setInlineValidationError] = useState<string | null>(null);
 
   useEffect(() => {
     if (currentScreen === 'RESULTS' || currentPhase === 'RESULTS') {
@@ -74,18 +72,16 @@ export default function Home() {
   const validateAndMergeData = useCallback(() => {
     if (!sourceData || !targetData) return;
 
+    setInlineValidationError(null);
     addLog('INFO', 'Initiating data validation protocol...');
 
     const sourceHasMSID = sourceData.length > 0 && 'MSID' in sourceData[0];
     const targetHasMSID = targetData.length > 0 && 'MSID' in targetData[0];
 
     if (!sourceHasMSID || !targetHasMSID) {
-      const error: ValidationError = {
-        type: 'MISSING_MSID_COLUMN',
-        message: `MSID column not found in ${!sourceHasMSID ? 'SOURCE_INPUT' : 'TARGET_OUTPUT'} file.`,
-      };
-      setValidationError(error);
-      setPhase('ERROR');
+      const msg = `MSID column not found in ${!sourceHasMSID ? 'SOURCE_INPUT' : 'TARGET_OUTPUT'} file.`;
+      setInlineValidationError(msg);
+      addLog('ERROR', msg);
       return;
     }
 
@@ -96,16 +92,9 @@ export default function Home() {
     const missingInSource = Array.from(targetMSIDs).filter((id) => !sourceMSIDs.has(id));
 
     if (missingInTarget.length > 0 || missingInSource.length > 0) {
-      const error: ValidationError = {
-        type: 'MSID_PARITY_ERROR',
-        message: 'MSID parity check failed. Records exist in one file but not the other.',
-        details: [
-          ...missingInTarget.map((id) => `MSID ${id}: Missing in TARGET_OUTPUT`),
-          ...missingInSource.map((id) => `MSID ${id}: Missing in SOURCE_INPUT`),
-        ],
-      };
-      setValidationError(error);
-      setPhase('ERROR');
+      const msg = `MSID parity error: ${missingInTarget.length + missingInSource.length} records don't match between files.`;
+      setInlineValidationError(msg);
+      addLog('ERROR', msg);
       return;
     }
 
@@ -149,16 +138,8 @@ export default function Home() {
       setPhase('KPI_CONFIG');
       setScreen('KPI_CONFIG');
     }
-  }, [sourceData, targetData, setMergedData, setValidationError, setPhase, setScreen, addLog, addDataMismatch, currentProject, setKPIs]);
+  }, [sourceData, targetData, setMergedData, setPhase, setScreen, addLog, addDataMismatch, currentProject, setKPIs]);
 
-  const handleUploadError = (message: string) => {
-    const error: ValidationError = {
-      type: 'MISSING_MSID_COLUMN',
-      message,
-    };
-    setValidationError(error);
-    setPhase('ERROR');
-  };
 
   const runEvaluation = useCallback(async () => {
     if (!mergedData || mergedData.length === 0) return;
@@ -368,18 +349,6 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="main-content">
-        {/* Error Screen Overlay */}
-        {validationError && (
-          <ErrorScreen
-            error={validationError}
-            onDismiss={() => {
-              setValidationError(null);
-              setPhase('UPLOAD');
-              setScreen('UPLOAD');
-            }}
-          />
-        )}
-
         {/* Screen: Projects Dashboard */}
         {currentScreen === 'PROJECTS' && (
           <ProjectsDashboard 
@@ -450,6 +419,17 @@ export default function Home() {
                     onClearError={() => setTargetFileError(false)}
                   />
                 </div>
+
+                {inlineValidationError && (
+                  <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="font-medium">{inlineValidationError}</span>
+                    </div>
+                  </div>
+                )}
 
                 {sourceData && targetData && !sourceFileError && !targetFileError && (
                   <div className="text-center mt-8">
