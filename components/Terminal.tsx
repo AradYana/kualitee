@@ -41,24 +41,17 @@ export default function Terminal({ onCommand, isProcessing = false }: TerminalPr
   ];
 
   return (
-    <div className="terminal-window overflow-hidden">
-      {/* Title Bar */}
-      <div className="title-bar">
-        <div className="flex items-center gap-2">
-          <span>Query Assistant</span>
-        </div>
-        <div className="title-bar-controls">
-          <button className="title-bar-btn" title="Minimize">─</button>
-          <button className="title-bar-btn" title="Maximize">□</button>
-          <button className="title-bar-btn" title="Close">×</button>
-        </div>
+    <div className="card overflow-hidden">
+      {/* Header */}
+      <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600">
+        <h2 className="text-lg font-semibold text-white">Query Assistant</h2>
       </div>
 
-      {/* Window Content */}
-      <div className="p-5" style={{ backgroundColor: '#e6e0d4' }}>
+      {/* Content */}
+      <div className="p-6">
         {/* Suggested Queries */}
-        <div className="mb-5">
-          <p className="text-xs text-text-secondary mb-3 font-semibold uppercase tracking-wide">
+        <div className="mb-6">
+          <p className="text-sm text-gray-500 mb-3 font-medium">
             ► Try Asking:
           </p>
           <div className="flex flex-wrap gap-3">
@@ -66,7 +59,7 @@ export default function Terminal({ onCommand, isProcessing = false }: TerminalPr
               <button
                 key={index}
                 onClick={() => handleSuggestionClick(query)}
-                className="suggestion-chip"
+                className="badge badge-info cursor-pointer hover:bg-blue-200 transition-colors text-sm py-2 px-4"
               >
                 {query}
               </button>
@@ -75,15 +68,15 @@ export default function Terminal({ onCommand, isProcessing = false }: TerminalPr
         </div>
 
         {/* Chat/Output Area */}
-        <div className="terminal-output p-4 mb-5">
+        <div className="bg-gray-50 rounded-xl p-5 mb-6">
           <div
             ref={containerRef}
             className="h-48 overflow-y-auto"
           >
             {/* Welcome message */}
-            <div className="mb-4 pb-3 border-b border-gray-300">
-              <p className="font-semibold text-text-primary">KUALITEE FEEDBACK INTERFACE INITIALIZED</p>
-              <p className="text-text-secondary text-sm mt-1">
+            <div className="mb-4 pb-3 border-b border-gray-200">
+              <p className="font-semibold text-gray-900">KUALITEE FEEDBACK INTERFACE INITIALIZED</p>
+              <p className="text-gray-600 text-sm mt-1">
                 Ask questions about your evaluation results in natural language.
               </p>
             </div>
@@ -92,16 +85,16 @@ export default function Terminal({ onCommand, isProcessing = false }: TerminalPr
             {terminalHistory.map((entry, index) => (
               <div key={`history-${index}`} className="mb-3 whitespace-pre-wrap">
                 {entry.startsWith('You:') ? (
-                  <span className="font-semibold" style={{ color: '#084999' }}>{entry}</span>
+                  <span className="font-semibold text-purple-600">{entry}</span>
                 ) : (
-                  <span className="text-text-primary">{entry}</span>
+                  <span className="text-gray-800">{entry}</span>
                 )}
               </div>
             ))}
 
             {/* Processing indicator */}
             {isProcessing && (
-              <div className="text-text-secondary animate-pulse">
+              <div className="text-gray-500 animate-pulse">
                 Processing query...
               </div>
             )}
@@ -115,7 +108,7 @@ export default function Terminal({ onCommand, isProcessing = false }: TerminalPr
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            className="text-input flex-1"
+            className="input-field flex-1"
             placeholder={isProcessing ? 'Processing...' : 'Ask a question about your results...'}
             disabled={isProcessing}
             autoFocus
@@ -123,7 +116,7 @@ export default function Terminal({ onCommand, isProcessing = false }: TerminalPr
           <button
             type="submit"
             disabled={isProcessing || !input.trim()}
-            className="send-btn"
+            className="btn-primary"
           >
             Send
           </button>

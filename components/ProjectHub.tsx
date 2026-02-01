@@ -137,8 +137,8 @@ export default function ProjectHub() {
   if (!currentProject) {
     return (
       <div className="text-center py-8">
-        <p className="text-text-secondary">No project selected</p>
-        <button onClick={goToProjects} className="send-btn mt-4">
+        <p className="text-gray-500">No project selected</p>
+        <button onClick={goToProjects} className="btn-primary mt-4">
           ← Back to Projects
         </button>
       </div>
@@ -155,7 +155,7 @@ export default function ProjectHub() {
   if (loading) {
     return (
       <div className="text-center py-8">
-        <p className="text-text-secondary">Loading project...</p>
+        <p className="text-white">Loading project...</p>
       </div>
     );
   }
@@ -163,12 +163,15 @@ export default function ProjectHub() {
   // Show Setup Wizard if triggered
   if (showSetupWizard && projectDetail) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 animate-fade-in">
         <button
           onClick={() => setShowSetupWizard(false)}
-          className="text-sm text-text-secondary hover:text-text-primary transition-colors"
+          className="text-white/80 hover:text-white transition-colors flex items-center gap-2"
         >
-          ← Back to Project
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Project
         </button>
         <ProjectSetupWizard
           project={projectDetail}
@@ -182,34 +185,36 @@ export default function ProjectHub() {
   // EMPTY STATE: Show setup required view when project needs configuration
   if (needsSetup) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 animate-fade-in">
         {/* Navigation */}
         <button
           onClick={goToProjects}
-          className="text-sm text-text-secondary hover:text-text-primary transition-colors"
+          className="text-white/80 hover:text-white transition-colors flex items-center gap-2"
         >
-          ← Back to All Projects
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to All Projects
         </button>
 
         {/* Project Header - Setup Required */}
-        <div className="terminal-window overflow-hidden">
-          <div className="title-bar" style={{ backgroundColor: '#FF8C00' }}>
-            <span>⚠️ {currentProject.name} - Setup Required</span>
-            <div className="title-bar-controls">
-              <button className="title-bar-btn">×</button>
-            </div>
+        <div className="card overflow-hidden">
+          <div className="px-6 py-4 bg-gradient-to-r from-orange-500 to-amber-500">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+              <span>⚠️</span> {currentProject.name} - Setup Required
+            </h2>
           </div>
-          <div className="p-6 text-center" style={{ backgroundColor: '#e6e0d4' }}>
+          <div className="p-8 text-center">
             <div className="text-6xl mb-4">🚧</div>
-            <h2 className="text-xl font-bold text-text-primary mb-2">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">
               Project Setup Required
             </h2>
-            <p className="text-text-secondary mb-6 max-w-md mx-auto">
+            <p className="text-gray-600 mb-6 max-w-md mx-auto">
               Before you can run evaluations, you need to configure your project context and define at least one KPI (Key Performance Indicator).
             </p>
             <button
               onClick={() => setShowSetupWizard(true)}
-              className="send-btn text-lg px-8 py-3"
+              className="btn-primary text-lg px-8 py-3"
             >
               🚀 Start Project Setup
             </button>
@@ -217,25 +222,22 @@ export default function ProjectHub() {
         </div>
 
         {/* Empty KPI Slots */}
-        <div className="terminal-window overflow-hidden">
-          <div className="title-bar">
-            <span>⚙️ Project KPIs (Not Configured)</span>
+        <div className="card overflow-hidden">
+          <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600">
+            <h2 className="text-lg font-semibold text-white">⚙️ Project KPIs (Not Configured)</h2>
           </div>
-          <div className="p-5" style={{ backgroundColor: '#e6e0d4' }}>
-            <div className="grid gap-3 md:grid-cols-2">
+          <div className="p-6">
+            <div className="grid gap-4 md:grid-cols-2">
               {[1, 2, 3, 4].map((num) => (
                 <div
                   key={num}
-                  className="terminal-output p-4 border-2 border-dashed"
-                  style={{ borderColor: '#808080', opacity: 0.5 }}
+                  className="bg-gray-100 rounded-xl p-4 border-2 border-dashed border-gray-300 opacity-50"
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="suggestion-chip text-xs" style={{ backgroundColor: '#ccc' }}>
-                      KPI_{num}
-                    </span>
-                    <span className="text-text-secondary italic">Not defined</span>
+                    <span className="badge badge-info opacity-50">KPI_{num}</span>
+                    <span className="text-gray-400 italic">Not defined</span>
                   </div>
-                  <p className="text-xs text-text-secondary italic">
+                  <p className="text-sm text-gray-400 italic">
                     Configure in setup wizard
                   </p>
                 </div>
@@ -245,16 +247,16 @@ export default function ProjectHub() {
         </div>
 
         {/* Empty Test History */}
-        <div className="terminal-window overflow-hidden">
-          <div className="title-bar">
-            <span>📊 Test History</span>
+        <div className="card overflow-hidden">
+          <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600">
+            <h2 className="text-lg font-semibold text-white">📊 Test History</h2>
           </div>
-          <div className="p-8 text-center" style={{ backgroundColor: '#e6e0d4' }}>
+          <div className="p-8 text-center">
             <div className="text-4xl mb-3 opacity-30">📋</div>
-            <p className="text-text-secondary mb-2">
+            <p className="text-gray-600 mb-2">
               Your test history will appear here
             </p>
-            <p className="text-sm text-text-secondary">
+            <p className="text-sm text-gray-500">
               Once you&apos;ve configured your project and uploaded your first data set, you&apos;ll see your evaluation runs listed here.
             </p>
           </div>
@@ -265,50 +267,42 @@ export default function ProjectHub() {
 
   // CONFIGURED STATE: Normal project hub view
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Navigation */}
       <button
         onClick={goToProjects}
-        className="text-sm text-text-secondary hover:text-text-primary transition-colors"
+        className="text-white/80 hover:text-white transition-colors flex items-center gap-2"
       >
-        ← Back to All Projects
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to All Projects
       </button>
 
       {/* Project Header */}
-      <div className="terminal-window overflow-hidden">
-        <div className="title-bar">
-          <span>📂 {currentProject.name}</span>
-          <div className="title-bar-controls">
-            <button className="title-bar-btn">─</button>
-            <button className="title-bar-btn">□</button>
-            <button className="title-bar-btn">×</button>
-          </div>
+      <div className="card overflow-hidden">
+        <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600">
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+            <span>📂</span> {currentProject.name}
+          </h2>
         </div>
-        <div className="p-5" style={{ backgroundColor: '#e6e0d4' }}>
+        <div className="p-6">
           {/* Project Context Info */}
           {projectDetail?.siteDescription && (
-            <div className="mb-4">
-              <p className="text-sm text-text-secondary">{projectDetail.siteDescription}</p>
-              {projectDetail.targetLanguage && (
-                <span className="suggestion-chip text-xs mt-2 inline-block">
-                  🌐 {projectDetail.targetLanguage}
-                </span>
-              )}
-            </div>
+            <p className="text-gray-600 mb-4">{projectDetail.siteDescription}</p>
           )}
           {currentProject.description && !projectDetail?.siteDescription && (
-            <p className="text-sm text-text-secondary mb-4">{currentProject.description}</p>
+            <p className="text-gray-600 mb-4">{currentProject.description}</p>
           )}
           
           {/* Actions */}
           <div className="flex gap-3">
-            <button onClick={startNewTest} className="send-btn">
+            <button onClick={startNewTest} className="btn-primary">
               🚀 Run New Test
             </button>
             <button
               onClick={() => setShowSetupWizard(true)}
-              className="send-btn"
-              style={{ backgroundColor: '#808080' }}
+              className="btn-secondary"
             >
               ⚙️ Edit Project Settings
             </button>
@@ -317,59 +311,56 @@ export default function ProjectHub() {
       </div>
 
       {/* Section A: Project KPIs */}
-      <div className="terminal-window overflow-hidden">
-        <div className="title-bar">
-          <span>⚙️ Project KPIs (Default Evaluation Criteria)</span>
-          <div className="title-bar-controls">
-            {!isEditingKPIs && (
-              <button
-                onClick={() => setIsEditingKPIs(true)}
-                className="title-bar-btn"
-                title="Edit KPIs"
-              >
-                ✏️
-              </button>
-            )}
-          </div>
+      <div className="card overflow-hidden">
+        <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-white">⚙️ Project KPIs (Default Evaluation Criteria)</h2>
+          {!isEditingKPIs && (
+            <button
+              onClick={() => setIsEditingKPIs(true)}
+              className="text-white/80 hover:text-white transition-colors"
+              title="Edit KPIs"
+            >
+              ✏️
+            </button>
+          )}
         </div>
-        <div className="p-5" style={{ backgroundColor: '#e6e0d4' }}>
+        <div className="p-6">
           {error && (
-            <p className="text-sm mb-4" style={{ color: '#CC0000' }}>⚠️ {error}</p>
+            <div className="badge badge-error w-full justify-center py-3 mb-4">⚠️ {error}</div>
           )}
           
           {isEditingKPIs ? (
             <div className="space-y-4">
               {editedKPIs.map((kpi, index) => (
-                <div key={index} className="terminal-output p-4">
-                  <div className="text-sm font-semibold text-text-primary mb-2">
+                <div key={index} className="bg-gray-50 rounded-xl p-4">
+                  <div className="text-sm font-semibold text-gray-800 mb-3">
                     KPI #{index + 1} {kpi.shortName && `[${kpi.shortName}]`}
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <input
                       type="text"
                       value={kpi.name}
                       onChange={(e) => updateEditedKPI(index, 'name', e.target.value)}
                       placeholder="KPI Name (e.g., Accuracy)"
-                      className="text-input w-full"
+                      className="input-field"
                     />
                     <textarea
                       value={kpi.description}
                       onChange={(e) => updateEditedKPI(index, 'description', e.target.value)}
                       placeholder="Description: What is Good vs Bad?"
-                      className="text-input w-full resize-none"
+                      className="input-field resize-none"
                       rows={2}
                     />
                   </div>
                 </div>
               ))}
-              <div className="flex gap-3">
-                <button onClick={handleSaveKPIs} className="send-btn">
+              <div className="flex gap-3 pt-2">
+                <button onClick={handleSaveKPIs} className="btn-primary">
                   Save KPIs
                 </button>
                 <button
                   onClick={() => setIsEditingKPIs(false)}
-                  className="send-btn"
-                  style={{ backgroundColor: '#808080' }}
+                  className="btn-secondary"
                 >
                   Cancel
                 </button>
@@ -378,14 +369,14 @@ export default function ProjectHub() {
           ) : (
             <div>
               {projectDetail?.kpis && projectDetail.kpis.length > 0 ? (
-                <div className="grid gap-3 md:grid-cols-2">
+                <div className="grid gap-4 md:grid-cols-2">
                   {projectDetail.kpis.map((kpi: any) => (
-                    <div key={kpi.id} className="terminal-output p-3">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="suggestion-chip text-xs">{kpi.shortName}</span>
-                        <span className="font-semibold text-text-primary">{kpi.name}</span>
+                    <div key={kpi.id} className="bg-gray-50 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="badge badge-info">{kpi.shortName}</span>
+                        <span className="font-semibold text-gray-900">{kpi.name}</span>
                       </div>
-                      <p className="text-xs text-text-secondary line-clamp-2">
+                      <p className="text-sm text-gray-600 line-clamp-2">
                         {kpi.description}
                       </p>
                     </div>
@@ -393,10 +384,10 @@ export default function ProjectHub() {
                 </div>
               ) : (
                 <div className="text-center py-4">
-                  <p className="text-text-secondary mb-2">No KPIs configured yet</p>
+                  <p className="text-gray-500 mb-2">No KPIs configured yet</p>
                   <button
                     onClick={() => setIsEditingKPIs(true)}
-                    className="send-btn"
+                    className="btn-primary"
                   >
                     Configure KPIs
                   </button>
@@ -408,46 +399,46 @@ export default function ProjectHub() {
       </div>
 
       {/* Section C: Test History */}
-      <div className="terminal-window overflow-hidden">
-        <div className="title-bar">
-          <span>📊 Test History (Last 100 Runs)</span>
+      <div className="card overflow-hidden">
+        <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600">
+          <h2 className="text-lg font-semibold text-white">📊 Test History (Last 100 Runs)</h2>
         </div>
-        <div className="p-5" style={{ backgroundColor: '#e6e0d4' }}>
+        <div className="p-6">
           {projectDetail?.testSets && projectDetail.testSets.length > 0 ? (
-            <div className="terminal-output overflow-x-auto">
-              <table className="data-table w-full">
+            <div className="overflow-x-auto">
+              <table className="w-full">
                 <thead>
-                  <tr>
-                    <th className="text-left p-2">Date</th>
-                    <th className="text-left p-2">Name</th>
-                    <th className="text-center p-2">Records</th>
-                    <th className="text-center p-2">Overall Score</th>
-                    <th className="text-center p-2">Action</th>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Date</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Name</th>
+                    <th className="text-center py-3 px-4 text-sm font-semibold text-gray-600">Records</th>
+                    <th className="text-center py-3 px-4 text-sm font-semibold text-gray-600">Overall Score</th>
+                    <th className="text-center py-3 px-4 text-sm font-semibold text-gray-600">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {projectDetail.testSets.map((testSet: TestSet) => (
-                    <tr key={testSet.id} className="border-t border-border-gray">
-                      <td className="p-2 text-sm">{formatDate(testSet.createdAt)}</td>
-                      <td className="p-2 text-sm font-medium">{testSet.name}</td>
-                      <td className="p-2 text-sm text-center">{testSet.resultCount || 0}</td>
-                      <td className="p-2 text-center">
+                    <tr key={testSet.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-3 px-4 text-sm text-gray-600">{formatDate(testSet.createdAt)}</td>
+                      <td className="py-3 px-4 text-sm font-medium text-gray-900">{testSet.name}</td>
+                      <td className="py-3 px-4 text-sm text-center text-gray-600">{testSet.resultCount || 0}</td>
+                      <td className="py-3 px-4 text-center">
                         <span
-                          className={`suggestion-chip text-xs ${
+                          className={`badge ${
                             (testSet.overallScore || 0) >= 4
-                              ? 'bg-green-200'
+                              ? 'badge-success'
                               : (testSet.overallScore || 0) >= 3
-                              ? 'bg-yellow-200'
-                              : 'bg-red-200'
+                              ? 'badge-warning'
+                              : 'badge-error'
                           }`}
                         >
                           {testSet.overallScore?.toFixed(2) || 'N/A'}/5
                         </span>
                       </td>
-                      <td className="p-2 text-center">
+                      <td className="py-3 px-4 text-center">
                         <button
                           onClick={() => handleViewTestSet(testSet.id)}
-                          className="text-sm text-title-bar hover:underline"
+                          className="text-sm text-purple-600 hover:text-purple-800 font-medium"
                         >
                           View Results →
                         </button>
@@ -459,8 +450,8 @@ export default function ProjectHub() {
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-text-secondary mb-2">No test runs yet</p>
-              <p className="text-sm text-text-secondary">
+              <p className="text-gray-600 mb-2">No test runs yet</p>
+              <p className="text-sm text-gray-500">
                 Click &quot;Run New Test&quot; to evaluate your first data set
               </p>
             </div>

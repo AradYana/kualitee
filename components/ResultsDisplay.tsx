@@ -81,22 +81,19 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
 
   if (!evaluationResults || evaluationResults.length === 0) {
     return (
-      <div className="terminal-window overflow-hidden">
-        <div className="title-bar">
-          <span>⚠️ Error</span>
-          <div className="title-bar-controls">
-            <button className="title-bar-btn">×</button>
-          </div>
+      <div className="card overflow-hidden">
+        <div className="px-6 py-4 bg-gradient-to-r from-red-500 to-orange-500">
+          <h2 className="text-lg font-semibold text-white">⚠️ Error</h2>
         </div>
-        <div className="p-6 text-center" style={{ backgroundColor: '#e6e0d4' }}>
-          <p className="font-bold mb-2" style={{ color: '#CC0000' }}>No evaluation results available</p>
-          <p className="text-sm text-text-secondary">
+        <div className="p-6 text-center">
+          <p className="font-bold mb-2 text-red-600">No evaluation results available</p>
+          <p className="text-sm text-gray-600">
             This usually means the Anthropic API key is not configured.
           </p>
-          <p className="text-sm text-text-secondary mt-2">
-            Add your key to <code className="px-1" style={{ backgroundColor: '#FFFFFF' }}>.env.local</code>:
+          <p className="text-sm text-gray-600 mt-2">
+            Add your key to <code className="px-2 py-1 bg-gray-100 rounded">`.env.local`</code>:
           </p>
-          <p className="text-sm font-mono p-2 mt-2 inline-block" style={{ backgroundColor: '#FFFFFF' }}>
+          <p className="text-sm font-mono bg-gray-100 px-4 py-2 rounded mt-2 inline-block">
             ANTHROPIC_API_KEY=sk-ant-your-key-here
           </p>
         </div>
@@ -105,10 +102,10 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
   }
 
   const getStatusColor = (score: number) => {
-    if (score >= 4.5) return '#008000';
-    if (score >= 3.5) return '#228B22';
-    if (score >= 2.5) return '#FF8C00';
-    return '#CC0000';
+    if (score >= 4.5) return '#16A34A';
+    if (score >= 3.5) return '#22C55E';
+    if (score >= 2.5) return '#F59E0B';
+    return '#DC2626';
   };
 
   const getStatusText = (score: number) => {
@@ -118,6 +115,13 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
     return 'CRITICAL';
   };
 
+  const getStatusBadge = (score: number) => {
+    if (score >= 4.5) return 'badge-success';
+    if (score >= 3.5) return 'badge-success';
+    if (score >= 2.5) return 'badge-warning';
+    return 'badge-error';
+  };
+
   const overallMean = summaryStats.length > 0
     ? summaryStats.reduce((acc, s) => acc + s.mean, 0) / summaryStats.length
     : 0;
@@ -125,46 +129,52 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
   return (
     <div className="space-y-6">
       {/* Summary Stats */}
-      <div className="terminal-window overflow-hidden">
-        <div className="title-bar">
-          <span>📊 Summary Statistics</span>
-          <div className="title-bar-controls">
-            <button className="title-bar-btn">─</button>
-            <button className="title-bar-btn">□</button>
-            <button className="title-bar-btn">×</button>
-          </div>
+      <div className="card overflow-hidden">
+        <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600">
+          <h2 className="text-lg font-semibold text-white">📊 Summary Statistics</h2>
         </div>
-        <div className="p-5" style={{ backgroundColor: '#e6e0d4' }}>
+        <div className="p-6">
           {/* Overview */}
-          <div className="suggestion-chip inline-block mb-4">
-            Total Records: {evaluationResults.length} | 
-            Overall Score: <span style={{ color: getStatusColor(overallMean), fontWeight: 'bold' }}>
-              {overallMean.toFixed(2)} / 5.00 [{getStatusText(overallMean)}]
-            </span>
+          <div className="flex items-center gap-4 mb-6 p-4 bg-gray-50 rounded-xl">
+            <div className="text-sm text-gray-600">
+              Total Records: <span className="font-bold text-gray-900">{evaluationResults.length}</span>
+            </div>
+            <div className="h-4 w-px bg-gray-300" />
+            <div className="text-sm text-gray-600">
+              Overall Score: 
+              <span className="ml-2 font-bold" style={{ color: getStatusColor(overallMean) }}>
+                {overallMean.toFixed(2)} / 5.00
+              </span>
+              <span className={`ml-2 badge ${getStatusBadge(overallMean)}`}>
+                {getStatusText(overallMean)}
+              </span>
+            </div>
           </div>
 
           {/* KPI Stats Table */}
-          <div className="terminal-output overflow-hidden">
-            <table className="data-table">
+          <div className="overflow-x-auto">
+            <table className="w-full">
               <thead>
-                <tr>
-                  <th>KPI</th>
-                  <th>Name</th>
-                  <th>Mean</th>
-                  <th>Median</th>
-                  <th>Samples</th>
-                  <th>Status</th>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">KPI</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Name</th>
+                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-600">Mean</th>
+                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-600">Median</th>
+                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-600">Samples</th>
+                  <th className="text-center py-3 px-4 text-sm font-semibold text-gray-600">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {summaryStats.map((stat) => (
-                  <tr key={stat.kpiId}>
-                    <td className="font-bold">[{stat.shortName}]</td>
-                    <td>{stat.kpiName}</td>
-                    <td style={{ color: getStatusColor(stat.mean), fontWeight: 'bold' }}>{stat.mean.toFixed(2)}</td>
-                    <td style={{ color: getStatusColor(stat.median), fontWeight: 'bold' }}>{stat.median.toFixed(2)}</td>
-                    <td>{stat.count}</td>
-                    <td style={{ color: getStatusColor(stat.mean), fontWeight: 'bold' }}>{getStatusText(stat.mean)}</td>
+                  <tr key={stat.kpiId} className="border-b border-gray-100">
+                    <td className="py-3 px-4 font-mono font-bold text-purple-600">[{stat.shortName}]</td>
+                    <td className="py-3 px-4 text-gray-900">{stat.kpiName}</td>
+                    <td className="py-3 px-4 text-center font-bold" style={{ color: getStatusColor(stat.mean) }}>{stat.mean.toFixed(2)}</td>
+                    <td className="py-3 px-4 text-center font-bold" style={{ color: getStatusColor(stat.median) }}>{stat.median.toFixed(2)}</td>
+                    <td className="py-3 px-4 text-center text-gray-600">{stat.count}</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className={`badge ${getStatusBadge(stat.mean)}`}>{getStatusText(stat.mean)}</span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -174,35 +184,34 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
       </div>
 
       {/* Detailed Results */}
-      <div className="terminal-window overflow-hidden">
-        <div className="title-bar">
-          <span>📋 Detailed Results {filterFailures && '(Failures Only)'}</span>
-          <div className="title-bar-controls">
-            <button className="title-bar-btn">─</button>
-            <button className="title-bar-btn">□</button>
-            <button className="title-bar-btn">×</button>
-          </div>
+      <div className="card overflow-hidden">
+        <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600">
+          <h2 className="text-lg font-semibold text-white">
+            📋 Detailed Results {filterFailures && '(Failures Only)'}
+          </h2>
         </div>
-        <div className="p-5" style={{ backgroundColor: '#e6e0d4' }}>
-          <p className="text-xs text-text-secondary mb-3">
+        <div className="p-6">
+          <p className="text-sm text-gray-500 mb-4">
             Showing {detailedResults.length} records • Hover over scores for justifications
           </p>
 
-          <div className="terminal-output overflow-hidden">
+          <div className="overflow-x-auto">
             <div className="max-h-64 overflow-y-auto">
-              <table className="data-table">
-                <thead className="sticky top-0">
-                  <tr>
-                    <th>MSID</th>
+              <table className="w-full">
+                <thead className="sticky top-0 bg-white">
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">MSID</th>
                     {activeKPIs.map((kpi) => (
-                      <th key={kpi.id}>{kpi.shortName || `KPI_${kpi.id}`}</th>
+                      <th key={kpi.id} className="text-center py-3 px-4 text-sm font-semibold text-gray-600">
+                        {kpi.shortName || `KPI_${kpi.id}`}
+                      </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {detailedResults.map((result: any) => (
-                    <tr key={result.msid}>
-                      <td className="font-mono font-bold">{result.msid}</td>
+                    <tr key={result.msid} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-3 px-4 font-mono text-sm font-medium text-gray-900">{result.msid}</td>
                       {activeKPIs.map((kpi) => {
                         const kpiKey = kpi.shortName || `KPI_${kpi.id}`;
                         const scoreData = result.scores[kpiKey];
@@ -210,7 +219,7 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
                         return (
                           <td
                             key={kpi.id}
-                            className="text-center cursor-help font-bold"
+                            className="py-3 px-4 text-center cursor-help font-bold"
                             style={{ color: getStatusColor(score) }}
                             title={scoreData?.justification || 'N/A'}
                           >
@@ -226,18 +235,18 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
           </div>
 
           <details className="mt-4">
-            <summary className="cursor-pointer text-sm hover:underline" style={{ color: '#084999' }}>
+            <summary className="cursor-pointer text-sm text-purple-600 hover:text-purple-800 font-medium">
               📖 View full justifications
             </summary>
-            <div className="terminal-output p-3 mt-2 max-h-48 overflow-y-auto">
+            <div className="bg-gray-50 rounded-xl p-4 mt-3 max-h-48 overflow-y-auto">
               {detailedResults.slice(0, 20).map((result: any) => (
-                <div key={result.msid} className="mb-3 text-xs border-b border-gray-200 pb-2">
-                  <div className="font-bold" style={{ color: '#084999' }}>MSID: {result.msid}</div>
+                <div key={result.msid} className="mb-3 text-sm border-b border-gray-200 pb-2 last:border-0">
+                  <div className="font-bold text-purple-600">MSID: {result.msid}</div>
                   {activeKPIs.map((kpi) => {
                     const kpiKey = kpi.shortName || `KPI_${kpi.id}`;
                     const scoreData = result.scores[kpiKey];
                     return (
-                      <div key={kpi.id} className="ml-3 text-text-secondary">
+                      <div key={kpi.id} className="ml-3 text-gray-600 text-sm">
                         [{kpiKey}] Score: {scoreData?.score || '-'} — {scoreData?.justification || 'N/A'}
                       </div>
                     );
@@ -250,45 +259,42 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
       </div>
 
       {/* System Logs */}
-      <div className="terminal-window overflow-hidden">
-        <div className="title-bar">
-          <span>{systemLogs.length > 0 ? '⚠️' : '✅'} System Logs</span>
-          <div className="title-bar-controls">
-            <button className="title-bar-btn">─</button>
-            <button className="title-bar-btn">□</button>
-            <button className="title-bar-btn">×</button>
-          </div>
+      <div className="card overflow-hidden">
+        <div className={`px-6 py-4 bg-gradient-to-r ${systemLogs.length > 0 ? 'from-orange-500 to-amber-500' : 'from-green-500 to-emerald-500'}`}>
+          <h2 className="text-lg font-semibold text-white">
+            {systemLogs.length > 0 ? '⚠️' : '✅'} System Logs
+          </h2>
         </div>
-        <div className="p-5" style={{ backgroundColor: '#e6e0d4' }}>
+        <div className="p-6">
           {systemLogs.length === 0 ? (
-            <div className="suggestion-chip inline-block">
-              <span style={{ color: '#008000' }}>✓ No data integrity issues detected</span>
+            <div className="badge badge-success">
+              ✓ No data integrity issues detected
             </div>
           ) : (
             <>
-              <p className="text-xs mb-3 font-bold" style={{ color: '#FF8C00' }}>
+              <p className="text-sm font-medium text-orange-600 mb-4">
                 {systemLogs.length} data integrity issue(s) detected
               </p>
-              <div className="terminal-output overflow-hidden">
+              <div className="overflow-x-auto">
                 <div className="max-h-32 overflow-y-auto">
-                  <table className="data-table">
+                  <table className="w-full">
                     <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>Type</th>
-                        <th>MSID</th>
-                        <th>Field</th>
-                        <th>Message</th>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-2 px-3 text-sm font-semibold text-gray-600">#</th>
+                        <th className="text-left py-2 px-3 text-sm font-semibold text-gray-600">Type</th>
+                        <th className="text-left py-2 px-3 text-sm font-semibold text-gray-600">MSID</th>
+                        <th className="text-left py-2 px-3 text-sm font-semibold text-gray-600">Field</th>
+                        <th className="text-left py-2 px-3 text-sm font-semibold text-gray-600">Message</th>
                       </tr>
                     </thead>
                     <tbody>
                       {systemLogs.map((log) => (
-                        <tr key={log.id}>
-                          <td>{log.id}</td>
-                          <td style={{ color: '#FF8C00' }}>{log.type}</td>
-                          <td>{log.msid}</td>
-                          <td>{log.field}</td>
-                          <td>{log.message}</td>
+                        <tr key={log.id} className="border-b border-gray-100">
+                          <td className="py-2 px-3 text-sm text-gray-600">{log.id}</td>
+                          <td className="py-2 px-3 text-sm text-orange-600 font-medium">{log.type}</td>
+                          <td className="py-2 px-3 text-sm text-gray-900">{log.msid}</td>
+                          <td className="py-2 px-3 text-sm text-gray-600">{log.field}</td>
+                          <td className="py-2 px-3 text-sm text-gray-600">{log.message}</td>
                         </tr>
                       ))}
                     </tbody>
