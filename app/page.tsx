@@ -53,6 +53,10 @@ export default function Home() {
   const [showFailuresOnly, setShowFailuresOnly] = useState(false);
   const [isTerminalProcessing, setIsTerminalProcessing] = useState(false);
   const [currentTestSetId, setCurrentTestSetId] = useState<string | null>(null);
+  
+  // Track file upload errors
+  const [sourceFileError, setSourceFileError] = useState(false);
+  const [targetFileError, setTargetFileError] = useState(false);
 
   useEffect(() => {
     if (currentScreen === 'RESULTS' || currentPhase === 'RESULTS') {
@@ -420,22 +424,34 @@ export default function Home() {
                     label="SOURCE_INPUT"
                     onDataLoaded={(data) => {
                       setSourceData(data);
+                      setSourceFileError(false);
                       addLog('INFO', `SOURCE_INPUT loaded: ${data.length} records`);
                     }}
-                    onError={handleUploadError}
+                    onError={(msg) => {
+                      setSourceFileError(true);
+                      setSourceData(null);
+                      addLog('ERROR', msg);
+                    }}
+                    onClearError={() => setSourceFileError(false)}
                   />
 
                   <FileUpload
                     label="TARGET_OUTPUT"
                     onDataLoaded={(data) => {
                       setTargetData(data);
+                      setTargetFileError(false);
                       addLog('INFO', `TARGET_OUTPUT loaded: ${data.length} records`);
                     }}
-                    onError={handleUploadError}
+                    onError={(msg) => {
+                      setTargetFileError(true);
+                      setTargetData(null);
+                      addLog('ERROR', msg);
+                    }}
+                    onClearError={() => setTargetFileError(false)}
                   />
                 </div>
 
-                {sourceData && targetData && (
+                {sourceData && targetData && !sourceFileError && !targetFileError && (
                   <div className="text-center mt-8">
                     <button onClick={validateAndMergeData} className="btn-primary text-lg px-8 py-3">
                       Validate & Proceed
