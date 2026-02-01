@@ -25,11 +25,14 @@ export async function GET() {
       orderBy: { updatedAt: 'desc' },
     });
 
-    // Transform to include lastRunDate
+    // Transform to include lastRunDate and config status
     const transformedProjects = projects.map((project) => ({
       id: project.id,
       name: project.name,
       description: project.description,
+      siteDescription: project.siteDescription,
+      targetLanguage: project.targetLanguage,
+      isConfigured: project.isConfigured,
       createdAt: project.createdAt,
       updatedAt: project.updatedAt,
       kpis: project.kpis,

@@ -17,6 +17,11 @@ model Project {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
+  // Project context for LLM evaluation (Niche logic)
+  siteDescription  String?   // Context about the site/product being evaluated
+  targetLanguage   String?   // e.g., "English (US)", "Spanish (Mexico)"
+  isConfigured     Boolean   @default(false)  // True after initial setup wizard
+
   // Project-level default KPIs
   kpis     ProjectKPI[]
   testSets TestSet[]

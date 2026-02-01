@@ -187,12 +187,22 @@ export default function ProjectsDashboard() {
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {projects.map((project) => (
+              {projects.map((project) => {
+                const needsSetup = !project.isConfigured || !project.kpis || project.kpis.length === 0;
+                return (
                 <div
                   key={project.id}
-                  className="terminal-output p-4 cursor-pointer hover:opacity-90 transition-opacity"
+                  className={`terminal-output p-4 cursor-pointer hover:opacity-90 transition-opacity ${needsSetup ? 'border-2 border-dashed' : ''}`}
+                  style={needsSetup ? { borderColor: '#FF8C00' } : {}}
                   onClick={() => goToProjectHub(project)}
                 >
+                  {needsSetup && (
+                    <div className="mb-2">
+                      <span className="text-xs px-2 py-1 rounded" style={{ backgroundColor: '#FF8C00', color: 'white' }}>
+                        ⚠️ Setup Required
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="font-semibold text-text-primary truncate flex-1">
                       {project.name}
@@ -238,7 +248,8 @@ export default function ProjectsDashboard() {
                     </span>
                   </div>
                 </div>
-              ))}
+              );
+              })}
             </div>
           )}
         </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { Project, TestSet, KPI } from '@/lib/types';
+import ProjectSetupWizard from './ProjectSetupWizard';
 
 interface ProjectDetail extends Project {
   testSets: TestSet[];
@@ -24,6 +25,10 @@ export default function ProjectHub() {
   const [isEditingKPIs, setIsEditingKPIs] = useState(false);
   const [editedKPIs, setEditedKPIs] = useState<KPI[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [showSetupWizard, setShowSetupWizard] = useState(false);
+  
+  // Determine if project needs setup (no KPIs configured)
+  const needsSetup = projectDetail && (!projectDetail.isConfigured || !projectDetail.kpis || projectDetail.kpis.length === 0);
 
   // Fetch project details on mount
   useEffect(() => {
@@ -140,6 +145,13 @@ export default function ProjectHub() {
     );
   }
 
+  const handleSetupComplete = (updatedProject: Project) => {
+    setProjectDetail({ ...projectDetail!, ...updatedProject });
+    setCurrentProject(updatedProject);
+    setShowSetupWizard(false);
+    fetchProjectDetail(); // Refresh to get full data
+  };
+
   if (loading) {
     return (
       <div className="text-center py-8">
@@ -148,6 +160,110 @@ export default function ProjectHub() {
     );
   }
 
+  // Show Setup Wizard if triggered
+  if (showSetupWizard && projectDetail) {
+    return (
+      <div className="space-y-6">
+        <button
+          onClick={() => setShowSetupWizard(false)}
+          className="text-sm text-text-secondary hover:text-text-primary transition-colors"
+        >
+          ← Back to Project
+        </button>
+        <ProjectSetupWizard
+          project={projectDetail}
+          onComplete={handleSetupComplete}
+          onCancel={() => setShowSetupWizard(false)}
+        />
+      </div>
+    );
+  }
+
+  // EMPTY STATE: Show setup required view when project needs configuration
+  if (needsSetup) {
+    return (
+      <div className="space-y-6">
+        {/* Navigation */}
+        <button
+          onClick={goToProjects}
+          className="text-sm text-text-secondary hover:text-text-primary transition-colors"
+        >
+          ← Back to All Projects
+        </button>
+
+        {/* Project Header - Setup Required */}
+        <div className="terminal-window overflow-hidden">
+          <div className="title-bar" style={{ backgroundColor: '#FF8C00' }}>
+            <span>⚠️ {currentProject.name} - Setup Required</span>
+            <div className="title-bar-controls">
+              <button className="title-bar-btn">×</button>
+            </div>
+          </div>
+          <div className="p-6 text-center" style={{ backgroundColor: '#e6e0d4' }}>
+            <div className="text-6xl mb-4">🚧</div>
+            <h2 className="text-xl font-bold text-text-primary mb-2">
+              Project Setup Required
+            </h2>
+            <p className="text-text-secondary mb-6 max-w-md mx-auto">
+              Before you can run evaluations, you need to configure your project context and define at least one KPI (Key Performance Indicator).
+            </p>
+            <button
+              onClick={() => setShowSetupWizard(true)}
+              className="send-btn text-lg px-8 py-3"
+            >
+              🚀 Start Project Setup
+            </button>
+          </div>
+        </div>
+
+        {/* Empty KPI Slots */}
+        <div className="terminal-window overflow-hidden">
+          <div className="title-bar">
+            <span>⚙️ Project KPIs (Not Configured)</span>
+          </div>
+          <div className="p-5" style={{ backgroundColor: '#e6e0d4' }}>
+            <div className="grid gap-3 md:grid-cols-2">
+              {[1, 2, 3, 4].map((num) => (
+                <div
+                  key={num}
+                  className="terminal-output p-4 border-2 border-dashed"
+                  style={{ borderColor: '#808080', opacity: 0.5 }}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="suggestion-chip text-xs" style={{ backgroundColor: '#ccc' }}>
+                      KPI_{num}
+                    </span>
+                    <span className="text-text-secondary italic">Not defined</span>
+                  </div>
+                  <p className="text-xs text-text-secondary italic">
+                    Configure in setup wizard
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Empty Test History */}
+        <div className="terminal-window overflow-hidden">
+          <div className="title-bar">
+            <span>📊 Test History</span>
+          </div>
+          <div className="p-8 text-center" style={{ backgroundColor: '#e6e0d4' }}>
+            <div className="text-4xl mb-3 opacity-30">📋</div>
+            <p className="text-text-secondary mb-2">
+              Your test history will appear here
+            </p>
+            <p className="text-sm text-text-secondary">
+              Once you&apos;ve configured your project and uploaded your first data set, you&apos;ll see your evaluation runs listed here.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // CONFIGURED STATE: Normal project hub view
   return (
     <div className="space-y-6">
       {/* Navigation */}
@@ -169,7 +285,18 @@ export default function ProjectHub() {
           </div>
         </div>
         <div className="p-5" style={{ backgroundColor: '#e6e0d4' }}>
-          {currentProject.description && (
+          {/* Project Context Info */}
+          {projectDetail?.siteDescription && (
+            <div className="mb-4">
+              <p className="text-sm text-text-secondary">{projectDetail.siteDescription}</p>
+              {projectDetail.targetLanguage && (
+                <span className="suggestion-chip text-xs mt-2 inline-block">
+                  🌐 {projectDetail.targetLanguage}
+                </span>
+              )}
+            </div>
+          )}
+          {currentProject.description && !projectDetail?.siteDescription && (
             <p className="text-sm text-text-secondary mb-4">{currentProject.description}</p>
           )}
           
@@ -177,6 +304,13 @@ export default function ProjectHub() {
           <div className="flex gap-3">
             <button onClick={startNewTest} className="send-btn">
               🚀 Run New Test
+            </button>
+            <button
+              onClick={() => setShowSetupWizard(true)}
+              className="send-btn"
+              style={{ backgroundColor: '#808080' }}
+            >
+              ⚙️ Edit Project Settings
             </button>
           </div>
         </div>

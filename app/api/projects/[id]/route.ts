@@ -71,6 +71,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         id: project.id,
         name: project.name,
         description: project.description,
+        siteDescription: project.siteDescription,
+        targetLanguage: project.targetLanguage,
+        isConfigured: project.isConfigured,
         createdAt: project.createdAt,
         updatedAt: project.updatedAt,
         kpis: project.kpis,
@@ -91,7 +94,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const body = await request.json();
-    const { name, description, kpis } = body;
+    const { name, description, siteDescription, targetLanguage, kpis, markAsConfigured } = body;
 
     // Check if project exists
     const existing = await prisma.project.findUnique({ where: { id } });
@@ -104,13 +107,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     // Update project and KPIs in a transaction
     const project = await prisma.$transaction(async (tx) => {
+      // Build update data
+      const updateData: any = {};
+      if (name !== undefined) updateData.name = name.trim();
+      if (description !== undefined) updateData.description = description?.trim() || null;
+      if (siteDescription !== undefined) updateData.siteDescription = siteDescription?.trim() || null;
+      if (targetLanguage !== undefined) updateData.targetLanguage = targetLanguage?.trim() || null;
+      if (markAsConfigured) updateData.isConfigured = true;
+
       // Update project details
       const updatedProject = await tx.project.update({
         where: { id },
-        data: {
-          name: name?.trim() || existing.name,
-          description: description?.trim() || existing.description,
-        },
+        data: updateData,
       });
 
       // If KPIs are provided, update them
@@ -118,16 +126,22 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         // Delete existing KPIs
         await tx.projectKPI.deleteMany({ where: { projectId: id } });
 
-        // Create new KPIs
-        await tx.projectKPI.createMany({
-          data: kpis.map((kpi: { name: string; description: string; shortName: string }, index: number) => ({
-            projectId: id,
-            kpiNumber: index + 1,
-            name: kpi.name,
-            description: kpi.description,
-            shortName: kpi.shortName || kpi.name.slice(0, 10).toUpperCase(),
-          })),
-        });
+        // Create new KPIs (filter out empty ones)
+        const validKPIs = kpis.filter((kpi: { name: string; description: string }) => 
+          kpi.name?.trim() && kpi.description?.trim()
+        );
+        
+        if (validKPIs.length > 0) {
+          await tx.projectKPI.createMany({
+            data: validKPIs.map((kpi: { name: string; description: string; shortName: string }, index: number) => ({
+              projectId: id,
+              kpiNumber: index + 1,
+              name: kpi.name.trim(),
+              description: kpi.description.trim(),
+              shortName: kpi.shortName?.trim() || kpi.name.slice(0, 10).toUpperCase(),
+            })),
+          });
+        }
       }
 
       return updatedProject;

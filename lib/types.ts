@@ -17,6 +17,11 @@ export interface Project {
   description: string | null;
   createdAt: string;
   updatedAt: string;
+  // Project context for LLM evaluation
+  siteDescription?: string | null;
+  targetLanguage?: string | null;
+  isConfigured?: boolean;
+  // Relations
   kpis: ProjectKPI[];
   testSetCount?: number;
   lastTestSet?: {
