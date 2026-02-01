@@ -11,6 +11,19 @@ interface SummaryRequest {
   kpis: KPI[];
 }
 
+// Generate fallback explanations based on score
+function getExplanationForScore(average: number): string {
+  if (average >= 4) {
+    return 'Performance meets optimal standards. Quality targets achieved.';
+  } else if (average >= 3) {
+    return 'Acceptable performance with room for improvement.';
+  } else if (average >= 2) {
+    return 'Below threshold. Review and remediation recommended.';
+  } else {
+    return 'Critical issues detected. Immediate attention required.';
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body: SummaryRequest = await request.json();
@@ -34,6 +47,15 @@ export async function POST(request: NextRequest) {
         shortExplanation: '',
       };
     });
+
+    // DEMO MODE: Use fallback explanations if no API key
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.log('[DEMO MODE] Generating fallback summary explanations');
+      summaries.forEach((s) => {
+        s.shortExplanation = getExplanationForScore(s.averageScore);
+      });
+      return NextResponse.json({ summaries });
+    }
 
     // Generate short explanations using Claude
     if (process.env.ANTHROPIC_API_KEY) {

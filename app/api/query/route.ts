@@ -5,16 +5,56 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+// Generate demo response based on query
+function generateDemoResponse(query: string, evaluationResults: any[], kpis: any[]): string {
+  const lowerQuery = query.toLowerCase();
+  
+  // Calculate stats
+  const totalRecords = evaluationResults.length;
+  const avgScores: Record<number, number> = {};
+  kpis.forEach((kpi: any) => {
+    const scores = evaluationResults
+      .flatMap((r: any) => r.scores.filter((s: any) => s.kpiId === kpi.id))
+      .map((s: any) => s.score);
+    avgScores[kpi.id] = scores.length > 0 
+      ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length 
+      : 0;
+  });
+  
+  // Check for common query patterns
+  if (lowerQuery.includes('< 3') || lowerQuery.includes('below') || lowerQuery.includes('failure')) {
+    const failingMsids = evaluationResults
+      .filter((r: any) => r.scores.some((s: any) => s.score < 3))
+      .slice(0, 5)
+      .map((r: any) => r.msid);
+    return `[DEMO MODE] Found ${failingMsids.length} records with scores below 3:\n\n${failingMsids.map((id: string) => `• MSID: ${id}`).join('\n')}\n\nNote: This is simulated demo data.`;
+  }
+  
+  if (lowerQuery.includes('average') || lowerQuery.includes('summary') || lowerQuery.includes('overall')) {
+    const statsLines = kpis.map((kpi: any) => 
+      `• ${kpi.name} (${kpi.shortName}): ${avgScores[kpi.id].toFixed(2)}/5`
+    ).join('\n');
+    return `[DEMO MODE] Overall Statistics:\n\nTotal Records: ${totalRecords}\n\n${statsLines}\n\nNote: This is simulated demo data.`;
+  }
+  
+  if (lowerQuery.includes('common') || lowerQuery.includes('reason') || lowerQuery.includes('why')) {
+    return `[DEMO MODE] Common patterns observed:\n\n• Inconsistent formatting in 23% of outputs\n• Missing context references in 15% of cases\n• Tone variations detected in 12% of responses\n\nNote: This is simulated demo data for demonstration purposes.`;
+  }
+  
+  // Default response
+  return `[DEMO MODE] Query received: "${query}"\n\nAnalysis based on ${totalRecords} evaluated records across ${kpis.length} KPIs.\n\nTo get real AI-powered analysis, configure your ANTHROPIC_API_KEY environment variable.\n\nNote: This is a demo response. The full version would provide detailed insights based on your actual data.`;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { query, evaluationResults, kpis } = body;
 
+    // DEMO MODE: Return mock response if no API key
     if (!process.env.ANTHROPIC_API_KEY) {
-      return NextResponse.json(
-        { error: 'Anthropic API key not configured. Add ANTHROPIC_API_KEY to .env.local' },
-        { status: 500 }
-      );
+      console.log('[DEMO MODE] Generating mock query response');
+      const demoResponse = generateDemoResponse(query, evaluationResults || [], kpis || []);
+      return NextResponse.json({ response: demoResponse });
     }
 
     // Build context from evaluation results

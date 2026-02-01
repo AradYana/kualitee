@@ -14,16 +14,48 @@ interface EvaluationBatchRequest {
   kpis: KPI[];
 }
 
+// Demo mode: generate realistic mock scores
+function generateDemoScores(kpis: KPI[]): { kpiId: number; score: number; explanation: string }[] {
+  const explanations: Record<number, string[]> = {
+    5: ['Excellent quality output', 'Meets all criteria optimally', 'Outstanding performance'],
+    4: ['Good quality with minor issues', 'Solid performance overall', 'Above average output'],
+    3: ['Acceptable but needs improvement', 'Meets basic requirements', 'Average quality'],
+    2: ['Below expectations', 'Multiple issues detected', 'Needs significant work'],
+    1: ['Critical failure detected', 'Does not meet requirements', 'Major quality issues'],
+  };
+  
+  return kpis.map((kpi) => {
+    // Generate weighted random scores (bias toward 3-4 for realistic distribution)
+    const weights = [0.05, 0.15, 0.35, 0.30, 0.15]; // weights for scores 1-5
+    const random = Math.random();
+    let cumulative = 0;
+    let score = 3;
+    for (let i = 0; i < weights.length; i++) {
+      cumulative += weights[i];
+      if (random < cumulative) {
+        score = i + 1;
+        break;
+      }
+    }
+    const expArray = explanations[score];
+    const explanation = expArray[Math.floor(Math.random() * expArray.length)];
+    return { kpiId: kpi.id, score, explanation };
+  });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body: EvaluationBatchRequest = await request.json();
     const { batch, kpis } = body;
 
+    // DEMO MODE: Return mock results if no API key
     if (!process.env.ANTHROPIC_API_KEY) {
-      return NextResponse.json(
-        { error: 'Anthropic API key not configured. Add ANTHROPIC_API_KEY to .env.local' },
-        { status: 500 }
-      );
+      console.log('[DEMO MODE] Generating mock evaluation results');
+      const demoResults = batch.map(({ source }) => ({
+        msid: source.MSID,
+        scores: generateDemoScores(kpis),
+      }));
+      return NextResponse.json({ results: demoResults });
     }
 
     // Process batch in parallel using Promise.all
@@ -141,11 +173,13 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { source, target, kpis, msid, userFeedback } = body;
 
+    // DEMO MODE: Return mock re-evaluation results
     if (!process.env.ANTHROPIC_API_KEY) {
-      return NextResponse.json(
-        { error: 'Anthropic API key not configured' },
-        { status: 500 }
-      );
+      console.log('[DEMO MODE] Generating mock re-evaluation for MSID:', msid);
+      return NextResponse.json({
+        msid,
+        scores: generateDemoScores(kpis),
+      });
     }
 
     const prompt = buildEvaluationPrompt(source, target, kpis);
