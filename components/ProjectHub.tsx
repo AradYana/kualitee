@@ -163,10 +163,10 @@ export default function ProjectHub() {
   // Show Setup Wizard if triggered
   if (showSetupWizard && projectDetail) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="max-w-5xl mx-auto space-y-6 animate-fade-in">
         <button
           onClick={() => setShowSetupWizard(false)}
-          className="text-white/80 hover:text-white transition-colors flex items-center gap-2"
+          className="text-white/70 hover:text-white transition-colors flex items-center gap-2 text-sm font-medium"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -185,11 +185,11 @@ export default function ProjectHub() {
   // EMPTY STATE: Show setup required view when project needs configuration
   if (needsSetup) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="max-w-5xl mx-auto space-y-6 animate-fade-in">
         {/* Navigation */}
         <button
           onClick={goToProjects}
-          className="text-white/80 hover:text-white transition-colors flex items-center gap-2"
+          className="text-white/70 hover:text-white transition-colors flex items-center gap-2 text-sm font-medium"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -197,67 +197,80 @@ export default function ProjectHub() {
           Back to All Projects
         </button>
 
-        {/* Project Header - Setup Required */}
-        <div className="card overflow-hidden">
-          <div className="px-6 py-4 bg-gradient-to-r from-orange-500 to-amber-500">
-            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-              <span>⚠️</span> {currentProject.name} - Setup Required
-            </h2>
-          </div>
-          <div className="p-8 text-center">
-            <div className="text-6xl mb-4">🚧</div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">
-              Project Setup Required
-            </h2>
-            <p className="text-gray-600 mb-6 max-w-md mx-auto">
-              Before you can run evaluations, you need to configure your project context and define at least one KPI (Key Performance Indicator).
-            </p>
-            <button
-              onClick={() => setShowSetupWizard(true)}
-              className="btn-primary text-lg px-8 py-3"
-            >
-              🚀 Start Project Setup
-            </button>
-          </div>
-        </div>
-
-        {/* Empty KPI Slots */}
-        <div className="card overflow-hidden">
-          <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600">
-            <h2 className="text-lg font-semibold text-white">⚙️ Project KPIs (Not Configured)</h2>
-          </div>
-          <div className="p-6">
-            <div className="grid gap-4 md:grid-cols-2">
-              {[1, 2, 3, 4].map((num) => (
-                <div
-                  key={num}
-                  className="bg-gray-100 rounded-xl p-4 border-2 border-dashed border-gray-300 opacity-50"
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="badge badge-info opacity-50">KPI_{num}</span>
-                    <span className="text-gray-400 italic">Not defined</span>
-                  </div>
-                  <p className="text-sm text-gray-400 italic">
-                    Configure in setup wizard
-                  </p>
-                </div>
-              ))}
+        {/* Section 1: Setup Required Hero Card */}
+        <div className="bg-white rounded-2xl shadow-sm p-8">
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            {/* Icon */}
+            <div className="flex-shrink-0">
+              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center">
+                <svg className="w-12 h-12 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+            </div>
+            
+            {/* Content */}
+            <div className="flex-1 text-center md:text-left">
+              <h1 className="text-2xl font-bold text-slate-800 mb-2">
+                {currentProject.name}
+              </h1>
+              <h2 className="text-lg font-semibold text-slate-600 mb-3">
+                Let&apos;s get your project set up
+              </h2>
+              <p className="text-slate-500 mb-6 max-w-lg">
+                Before you can run evaluations, configure your project context and define at least one KPI (Key Performance Indicator) to measure quality.
+              </p>
+              <button
+                onClick={() => setShowSetupWizard(true)}
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold px-8 py-3 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg shadow-purple-500/25"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Start Project Setup
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Empty Test History */}
-        <div className="card overflow-hidden">
-          <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600">
-            <h2 className="text-lg font-semibold text-white">📊 Test History</h2>
+        {/* Section 2: KPI Placeholders (Ghost Cards) */}
+        <div className="bg-white rounded-2xl shadow-sm p-6">
+          <h3 className="text-lg font-bold text-slate-800 mb-1">Evaluation KPIs</h3>
+          <p className="text-sm text-slate-500 mb-5">Define up to 4 key performance indicators for your evaluations</p>
+          
+          <div className="grid gap-4 md:grid-cols-2">
+            {[1, 2, 3, 4].map((num) => (
+              <div
+                key={num}
+                className="bg-slate-50 rounded-xl p-5 border border-slate-100"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-xs font-semibold text-slate-400 bg-slate-200/50 px-2 py-1 rounded">
+                    KPI {num}
+                  </span>
+                </div>
+                <p className="text-slate-400 text-sm">
+                  Not defined yet
+                </p>
+              </div>
+            ))}
           </div>
-          <div className="p-8 text-center">
-            <div className="text-4xl mb-3 opacity-30">📋</div>
-            <p className="text-gray-600 mb-2">
-              Your test history will appear here
-            </p>
-            <p className="text-sm text-gray-500">
-              Once you&apos;ve configured your project and uploaded your first data set, you&apos;ll see your evaluation runs listed here.
+        </div>
+
+        {/* Section 3: Test History Empty State */}
+        <div className="bg-white rounded-2xl shadow-sm p-6">
+          <h3 className="text-lg font-bold text-slate-800 mb-5">Test History</h3>
+          
+          <div className="text-center py-10">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-100 flex items-center justify-center">
+              <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+              </svg>
+            </div>
+            <p className="text-slate-600 font-medium mb-1">No test runs yet</p>
+            <p className="text-sm text-slate-400 max-w-sm mx-auto">
+              Complete the setup wizard to configure your KPIs, then run your first evaluation.
             </p>
           </div>
         </div>
@@ -267,11 +280,11 @@ export default function ProjectHub() {
 
   // CONFIGURED STATE: Normal project hub view
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="max-w-5xl mx-auto space-y-6 animate-fade-in">
       {/* Navigation */}
       <button
         onClick={goToProjects}
-        className="text-white/80 hover:text-white transition-colors flex items-center gap-2"
+        className="text-white/70 hover:text-white transition-colors flex items-center gap-2 text-sm font-medium"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -279,184 +292,199 @@ export default function ProjectHub() {
         Back to All Projects
       </button>
 
-      {/* Project Header */}
-      <div className="card overflow-hidden">
-        <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-            <span>📂</span> {currentProject.name}
-          </h2>
-        </div>
-        <div className="p-6">
-          {/* Project Context Info */}
-          {projectDetail?.siteDescription && (
-            <p className="text-gray-600 mb-4">{projectDetail.siteDescription}</p>
-          )}
-          {currentProject.description && !projectDetail?.siteDescription && (
-            <p className="text-gray-600 mb-4">{currentProject.description}</p>
-          )}
+      {/* Project Header Card */}
+      <div className="bg-white rounded-2xl shadow-sm p-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800 mb-1">
+              {currentProject.name}
+            </h1>
+            {projectDetail?.siteDescription && (
+              <p className="text-slate-500">{projectDetail.siteDescription}</p>
+            )}
+            {currentProject.description && !projectDetail?.siteDescription && (
+              <p className="text-slate-500">{currentProject.description}</p>
+            )}
+          </div>
           
           {/* Actions */}
           <div className="flex gap-3">
             <button onClick={startNewTest} className="btn-primary">
-              🚀 Run New Test
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Run New Test
             </button>
             <button
               onClick={() => setShowSetupWizard(true)}
               className="btn-secondary"
             >
-              ⚙️ Edit Project Settings
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Edit Settings
             </button>
           </div>
         </div>
       </div>
 
-      {/* Section A: Project KPIs */}
-      <div className="card overflow-hidden">
-        <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">⚙️ Project KPIs (Default Evaluation Criteria)</h2>
+      {/* Section: Project KPIs */}
+      <div className="bg-white rounded-2xl shadow-sm p-6">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h3 className="text-lg font-bold text-slate-800">Evaluation KPIs</h3>
+            <p className="text-sm text-slate-500">Default criteria for evaluating LLM outputs</p>
+          </div>
           {!isEditingKPIs && (
             <button
               onClick={() => setIsEditingKPIs(true)}
-              className="text-white/80 hover:text-white transition-colors"
-              title="Edit KPIs"
+              className="text-purple-600 hover:text-purple-700 font-medium text-sm flex items-center gap-1"
             >
-              ✏️
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              Edit
             </button>
           )}
         </div>
-        <div className="p-6">
-          {error && (
-            <div className="badge badge-error w-full justify-center py-3 mb-4">⚠️ {error}</div>
-          )}
-          
-          {isEditingKPIs ? (
-            <div className="space-y-4">
-              {editedKPIs.map((kpi, index) => (
-                <div key={index} className="bg-gray-50 rounded-xl p-4">
-                  <div className="text-sm font-semibold text-gray-800 mb-3">
-                    KPI #{index + 1} {kpi.shortName && `[${kpi.shortName}]`}
-                  </div>
-                  <div className="space-y-3">
-                    <input
-                      type="text"
-                      value={kpi.name}
-                      onChange={(e) => updateEditedKPI(index, 'name', e.target.value)}
-                      placeholder="KPI Name (e.g., Accuracy)"
-                      className="input-field"
-                    />
-                    <textarea
-                      value={kpi.description}
-                      onChange={(e) => updateEditedKPI(index, 'description', e.target.value)}
-                      placeholder="Description: What is Good vs Bad?"
-                      className="input-field resize-none"
-                      rows={2}
-                    />
-                  </div>
+        
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">⚠️ {error}</div>
+        )}
+        
+        {isEditingKPIs ? (
+          <div className="space-y-4">
+            {editedKPIs.map((kpi, index) => (
+              <div key={index} className="bg-slate-50 rounded-xl p-5">
+                <div className="text-sm font-semibold text-slate-700 mb-3">
+                  KPI {index + 1} {kpi.shortName && <span className="text-purple-600">[{kpi.shortName}]</span>}
                 </div>
-              ))}
-              <div className="flex gap-3 pt-2">
-                <button onClick={handleSaveKPIs} className="btn-primary">
-                  Save KPIs
-                </button>
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    value={kpi.name}
+                    onChange={(e) => updateEditedKPI(index, 'name', e.target.value)}
+                    placeholder="KPI Name (e.g., Accuracy)"
+                    className="input-field"
+                  />
+                  <textarea
+                    value={kpi.description}
+                    onChange={(e) => updateEditedKPI(index, 'description', e.target.value)}
+                    placeholder="Description: What is Good vs Bad?"
+                    className="input-field resize-none"
+                    rows={2}
+                  />
+                </div>
+              </div>
+            ))}
+            <div className="flex gap-3 pt-2">
+              <button onClick={handleSaveKPIs} className="btn-primary">
+                Save KPIs
+              </button>
+              <button
+                onClick={() => setIsEditingKPIs(false)}
+                className="btn-secondary"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div>
+            {projectDetail?.kpis && projectDetail.kpis.length > 0 ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                {projectDetail.kpis.map((kpi: any) => (
+                  <div key={kpi.id} className="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-1 rounded">
+                        {kpi.shortName}
+                      </span>
+                      <span className="font-semibold text-slate-800">{kpi.name}</span>
+                    </div>
+                    <p className="text-sm text-slate-500 line-clamp-2">
+                      {kpi.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-slate-500 mb-3">No KPIs configured yet</p>
                 <button
-                  onClick={() => setIsEditingKPIs(false)}
-                  className="btn-secondary"
+                  onClick={() => setIsEditingKPIs(true)}
+                  className="btn-primary"
                 >
-                  Cancel
+                  Configure KPIs
                 </button>
               </div>
-            </div>
-          ) : (
-            <div>
-              {projectDetail?.kpis && projectDetail.kpis.length > 0 ? (
-                <div className="grid gap-4 md:grid-cols-2">
-                  {projectDetail.kpis.map((kpi: any) => (
-                    <div key={kpi.id} className="bg-gray-50 rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="badge badge-info">{kpi.shortName}</span>
-                        <span className="font-semibold text-gray-900">{kpi.name}</span>
-                      </div>
-                      <p className="text-sm text-gray-600 line-clamp-2">
-                        {kpi.description}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-4">
-                  <p className="text-gray-500 mb-2">No KPIs configured yet</p>
-                  <button
-                    onClick={() => setIsEditingKPIs(true)}
-                    className="btn-primary"
-                  >
-                    Configure KPIs
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Section C: Test History */}
-      <div className="card overflow-hidden">
-        <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600">
-          <h2 className="text-lg font-semibold text-white">📊 Test History (Last 100 Runs)</h2>
-        </div>
-        <div className="p-6">
-          {projectDetail?.testSets && projectDetail.testSets.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Date</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Name</th>
-                    <th className="text-center py-3 px-4 text-sm font-semibold text-gray-600">Records</th>
-                    <th className="text-center py-3 px-4 text-sm font-semibold text-gray-600">Overall Score</th>
-                    <th className="text-center py-3 px-4 text-sm font-semibold text-gray-600">Action</th>
+      {/* Section: Test History */}
+      <div className="bg-white rounded-2xl shadow-sm p-6">
+        <h3 className="text-lg font-bold text-slate-800 mb-1">Test History</h3>
+        <p className="text-sm text-slate-500 mb-5">Recent evaluation runs</p>
+        
+        {projectDetail?.testSets && projectDetail.testSets.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-slate-200">
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Date</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-600">Name</th>
+                  <th className="text-center py-3 px-4 text-sm font-semibold text-slate-600">Records</th>
+                  <th className="text-center py-3 px-4 text-sm font-semibold text-slate-600">Score</th>
+                  <th className="text-right py-3 px-4 text-sm font-semibold text-slate-600">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {projectDetail.testSets.map((testSet: TestSet) => (
+                  <tr key={testSet.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td className="py-4 px-4 text-sm text-slate-600">{formatDate(testSet.createdAt)}</td>
+                    <td className="py-4 px-4 text-sm font-medium text-slate-800">{testSet.name}</td>
+                    <td className="py-4 px-4 text-sm text-center text-slate-600">{testSet.resultCount || 0}</td>
+                    <td className="py-4 px-4 text-center">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
+                          (testSet.overallScore || 0) >= 4
+                            ? 'bg-green-100 text-green-700'
+                            : (testSet.overallScore || 0) >= 3
+                            ? 'bg-amber-100 text-amber-700'
+                            : 'bg-red-100 text-red-700'
+                        }`}
+                      >
+                        {testSet.overallScore?.toFixed(2) || 'N/A'} / 5
+                      </span>
+                    </td>
+                    <td className="py-4 px-4 text-right">
+                      <button
+                        onClick={() => handleViewTestSet(testSet.id)}
+                        className="text-sm text-purple-600 hover:text-purple-800 font-medium"
+                      >
+                        View →
+                      </button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {projectDetail.testSets.map((testSet: TestSet) => (
-                    <tr key={testSet.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-3 px-4 text-sm text-gray-600">{formatDate(testSet.createdAt)}</td>
-                      <td className="py-3 px-4 text-sm font-medium text-gray-900">{testSet.name}</td>
-                      <td className="py-3 px-4 text-sm text-center text-gray-600">{testSet.resultCount || 0}</td>
-                      <td className="py-3 px-4 text-center">
-                        <span
-                          className={`badge ${
-                            (testSet.overallScore || 0) >= 4
-                              ? 'badge-success'
-                              : (testSet.overallScore || 0) >= 3
-                              ? 'badge-warning'
-                              : 'badge-error'
-                          }`}
-                        >
-                          {testSet.overallScore?.toFixed(2) || 'N/A'}/5
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <button
-                          onClick={() => handleViewTestSet(testSet.id)}
-                          className="text-sm text-purple-600 hover:text-purple-800 font-medium"
-                        >
-                          View Results →
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-center py-10">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-100 flex items-center justify-center">
+              <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+              </svg>
             </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-600 mb-2">No test runs yet</p>
-              <p className="text-sm text-gray-500">
-                Click &quot;Run New Test&quot; to evaluate your first data set
-              </p>
-            </div>
-          )}
-        </div>
+            <p className="text-slate-600 font-medium mb-1">No test runs yet</p>
+            <p className="text-sm text-slate-400">
+              Click &quot;Run New Test&quot; to evaluate your first data set
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
