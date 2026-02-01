@@ -4,10 +4,22 @@ import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { Project } from '@/lib/types';
 
-export default function ProjectsDashboard() {
+interface ProjectsDashboardProps {
+  showCreateModal?: boolean;
+  onCloseCreateModal?: () => void;
+}
+
+export default function ProjectsDashboard({ showCreateModal, onCloseCreateModal }: ProjectsDashboardProps) {
   const { goToProjectHub, setLoading, addLog } = useAppStore();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isCreating, setIsCreating] = useState(false);
+
+  // Sync with external modal trigger from Header
+  useEffect(() => {
+    if (showCreateModal) {
+      setIsCreating(true);
+    }
+  }, [showCreateModal]);
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDescription, setNewProjectDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +70,7 @@ export default function ProjectsDashboard() {
       setNewProjectName('');
       setNewProjectDescription('');
       setIsCreating(false);
+      onCloseCreateModal?.();
       await fetchProjects();
       
       goToProjectHub(data.project);
@@ -112,7 +125,7 @@ export default function ProjectsDashboard() {
     <div className="animate-fade-in">
       {/* Create Project Modal */}
       {isCreating && (
-        <div className="modal-overlay" onClick={() => setIsCreating(false)}>
+        <div className="modal-overlay" onClick={() => { setIsCreating(false); onCloseCreateModal?.(); }}>
           <div className="modal-content p-8" onClick={e => e.stopPropagation()}>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Create New Project</h2>
             <p className="text-gray-500 mb-6">Set up a new evaluation project for your LLM outputs.</p>
@@ -153,6 +166,7 @@ export default function ProjectsDashboard() {
                 <button
                   onClick={() => {
                     setIsCreating(false);
+                    onCloseCreateModal?.();
                     setNewProjectName('');
                     setNewProjectDescription('');
                     setError(null);

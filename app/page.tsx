@@ -343,7 +343,10 @@ export default function Home() {
 
         {/* Screen: Projects Dashboard */}
         {currentScreen === 'PROJECTS' && (
-          <ProjectsDashboard />
+          <ProjectsDashboard 
+            showCreateModal={showNewProjectModal} 
+            onCloseCreateModal={() => setShowNewProjectModal(false)} 
+          />
         )}
 
         {/* Screen: Project Hub */}
