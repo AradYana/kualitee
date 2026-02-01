@@ -10,19 +10,15 @@ interface ProjectSetupWizardProps {
   onCancel: () => void;
 }
 
-type WizardStep = 'CONTEXT' | 'KPI_1' | 'KPI_2' | 'KPI_3' | 'KPI_4' | 'COMPLETE';
+type WizardStep = 'KPI_1' | 'KPI_2' | 'KPI_3' | 'KPI_4' | 'COMPLETE';
 
 export default function ProjectSetupWizard({ project, onComplete, onCancel }: ProjectSetupWizardProps) {
   const { addLog } = useAppStore();
   
-  // Step tracking
-  const [currentStep, setCurrentStep] = useState<WizardStep>('CONTEXT');
+  // Step tracking - start directly at KPI_1 (context already collected during project creation)
+  const [currentStep, setCurrentStep] = useState<WizardStep>('KPI_1');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // Project context
-  const [projectName, setProjectName] = useState(project.name);
-  const [siteDescription, setSiteDescription] = useState(project.siteDescription || '');
   
   // KPIs
   const [kpis, setKpis] = useState<KPI[]>([
@@ -60,19 +56,6 @@ export default function ProjectSetupWizard({ project, onComplete, onCancel }: Pr
       return updated;
     });
     if (error) setError(null);
-  };
-
-  const handleContextNext = () => {
-    if (!projectName.trim()) {
-      setError('Project name is required');
-      return;
-    }
-    if (!siteDescription.trim()) {
-      setError('Site description is required for accurate LLM evaluation');
-      return;
-    }
-    setError(null);
-    setCurrentStep('KPI_1');
   };
 
   const handleKPIConfirm = () => {
@@ -123,8 +106,6 @@ export default function ProjectSetupWizard({ project, onComplete, onCancel }: Pr
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: projectName.trim(),
-          siteDescription: siteDescription.trim(),
           kpis: validKPIs.map(k => ({
             name: k.name,
             description: k.description,
@@ -139,7 +120,7 @@ export default function ProjectSetupWizard({ project, onComplete, onCancel }: Pr
       }
 
       const data = await response.json();
-      addLog('SUCCESS', `Project "${projectName}" configured with ${validKPIs.length} KPI(s)`);
+      addLog('SUCCESS', `Project "${project.name}" configured with ${validKPIs.length} KPI(s)`);
       onComplete(data.project);
     } catch (err) {
       console.error('Error saving project:', err);
@@ -151,18 +132,16 @@ export default function ProjectSetupWizard({ project, onComplete, onCancel }: Pr
 
   const getStepNumber = (): number => {
     switch (currentStep) {
-      case 'CONTEXT': return 1;
-      case 'KPI_1': return 2;
-      case 'KPI_2': return 3;
-      case 'KPI_3': return 4;
-      case 'KPI_4': return 5;
+      case 'KPI_1': return 1;
+      case 'KPI_2': return 2;
+      case 'KPI_3': return 3;
+      case 'KPI_4': return 4;
       default: return 1;
     }
   };
 
   const getStepTitle = (): string => {
     switch (currentStep) {
-      case 'CONTEXT': return 'Project Settings';
       case 'KPI_1': return 'Define KPI #1';
       case 'KPI_2': return 'Define KPI #2';
       case 'KPI_3': return 'Define KPI #3';
@@ -180,7 +159,7 @@ export default function ProjectSetupWizard({ project, onComplete, onCancel }: Pr
             <h2 className="text-xl font-bold text-slate-800">
               {getStepTitle()}
             </h2>
-            <p className="text-sm text-slate-500 mt-1">Step {getStepNumber()} of 5</p>
+            <p className="text-sm text-slate-500 mt-1">Step {getStepNumber()} of 4</p>
           </div>
           <button 
             onClick={onCancel} 
@@ -196,7 +175,7 @@ export default function ProjectSetupWizard({ project, onComplete, onCancel }: Pr
       <div className="p-6">
         {/* Progress Indicator */}
         <div className="progress-steps mb-8">
-          {[1, 2, 3, 4, 5].map((step) => (
+          {[1, 2, 3, 4].map((step) => (
             <div key={step} className="flex items-center">
               <div
                 className={`progress-step ${
@@ -209,63 +188,12 @@ export default function ProjectSetupWizard({ project, onComplete, onCancel }: Pr
               >
                 {step < getStepNumber() ? '✓' : step}
               </div>
-              {step < 5 && (
+              {step < 4 && (
                 <div className={`progress-connector ${step < getStepNumber() ? 'completed' : ''}`} />
               )}
             </div>
           ))}
         </div>
-
-        {/* Step: Project Context */}
-        {currentStep === 'CONTEXT' && (
-          <div className="space-y-6">
-            <p className="text-slate-600">
-              Tell us about your project so the LLM can provide more accurate evaluations.
-            </p>
-
-            <div className="space-y-5">
-              <div>
-                <label className="input-label">Project Name *</label>
-                <input
-                  type="text"
-                  value={projectName}
-                  onChange={(e) => setProjectName(e.target.value)}
-                  placeholder="e.g., Customer Support Bot Evaluation"
-                  className="input-field"
-                />
-              </div>
-
-              <div>
-                <label className="input-label">Prompt / Agent Context *</label>
-                <p className="text-sm text-slate-500 mb-2">
-                  Describe what your LLM prompt or AI agent is designed to do, its goal, and a summary of the logic. This context helps evaluate outputs more accurately.
-                </p>
-                <textarea
-                  value={siteDescription}
-                  onChange={(e) => setSiteDescription(e.target.value)}
-                  placeholder="e.g., A customer support chatbot that answers questions about software subscriptions. It should be helpful, accurate, and guide users to solutions. The agent retrieves FAQ data and generates contextual responses."
-                  className="input-field resize-none"
-                  rows={4}
-                />
-              </div>
-            </div>
-
-            {error && (
-              <div className="badge badge-error w-full justify-center py-3">
-                ⚠️ {error}
-              </div>
-            )}
-
-            <div className="flex justify-between pt-4">
-              <button onClick={onCancel} className="btn-secondary">
-                Cancel
-              </button>
-              <button onClick={handleContextNext} className="btn-primary">
-                Next: Define KPIs →
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Steps: KPI Configuration */}
         {currentKPI && (
@@ -324,15 +252,21 @@ export default function ProjectSetupWizard({ project, onComplete, onCancel }: Pr
             )}
 
             <div className="flex justify-between gap-3 pt-4">
-              <button
-                onClick={() => {
-                  const prevSteps: WizardStep[] = ['CONTEXT', 'KPI_1', 'KPI_2', 'KPI_3'];
-                  setCurrentStep(prevSteps[getStepNumber() - 2] || 'CONTEXT');
-                }}
-                className="btn-secondary"
-              >
-                ← Back
-              </button>
+              {currentStep === 'KPI_1' ? (
+                <button onClick={onCancel} className="btn-secondary">
+                  Cancel
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    const prevSteps: WizardStep[] = ['KPI_1', 'KPI_1', 'KPI_2', 'KPI_3'];
+                    setCurrentStep(prevSteps[getStepNumber() - 1] || 'KPI_1');
+                  }}
+                  className="btn-secondary"
+                >
+                  ← Back
+                </button>
+              )}
               
               <div className="flex gap-3">
                 {/* Skip button - only show after KPI_1 if at least 1 is configured */}

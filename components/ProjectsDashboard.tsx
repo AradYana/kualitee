@@ -43,6 +43,10 @@ export default function ProjectsDashboard({ isCreateModalOpen, onOpenCreateModal
       setError('Project name is required');
       return;
     }
+    if (!newProjectDescription.trim()) {
+      setError('Prompt/Agent context is required');
+      return;
+    }
 
     setLoading(true, 'Creating project...');
     try {
@@ -51,7 +55,7 @@ export default function ProjectsDashboard({ isCreateModalOpen, onOpenCreateModal
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: newProjectName.trim(),
-          description: newProjectDescription.trim() || null,
+          siteDescription: newProjectDescription.trim(),
         }),
       });
 
@@ -135,11 +139,14 @@ export default function ProjectsDashboard({ isCreateModalOpen, onOpenCreateModal
                 />
               </div>
               <div>
-                <label className="input-label">Description (optional)</label>
+                <label className="input-label">Prompt / Agent Context *</label>
+                <p className="text-sm text-slate-500 mb-2">
+                  Describe what your LLM prompt or AI agent is designed to do.
+                </p>
                 <textarea
                   value={newProjectDescription}
                   onChange={(e) => setNewProjectDescription(e.target.value)}
-                  placeholder="Brief description of this evaluation project..."
+                  placeholder="e.g., A customer support chatbot that answers questions about software subscriptions. It should be helpful, accurate, and guide users to solutions."
                   className="input-field resize-none"
                   rows={3}
                 />

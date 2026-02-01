@@ -54,7 +54,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, description, kpis } = body;
+    const { name, siteDescription, kpis } = body;
 
     if (!name?.trim()) {
       return NextResponse.json(
@@ -63,11 +63,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!siteDescription?.trim()) {
+      return NextResponse.json(
+        { error: 'Prompt/Agent context is required' },
+        { status: 400 }
+      );
+    }
+
     // Create project with KPIs in a transaction
     const project = await prisma.project.create({
       data: {
         name: name.trim(),
-        description: description?.trim() || null,
+        siteDescription: siteDescription.trim(),
         kpis: {
           create: kpis?.map((kpi: { name: string; description: string; shortName: string }, index: number) => ({
             kpiNumber: index + 1,
