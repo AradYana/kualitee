@@ -320,12 +320,20 @@ export default function Home() {
   // Determine if we're in a test flow (Upload, KPI Config, Evaluating, Results)
   const isInTestFlow = ['UPLOAD', 'KPI_CONFIG', 'EVALUATING', 'RESULTS'].includes(currentScreen);
 
-  const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+  const [showCreateProjectModal, setShowCreateProjectModal] = useState(false);
+
+  const handleOpenCreateModal = () => {
+    setShowCreateProjectModal(true);
+  };
+
+  const handleCloseCreateModal = () => {
+    setShowCreateProjectModal(false);
+  };
 
   return (
     <div className="app-container min-h-screen">
       {/* Header */}
-      <Header onNewProject={currentScreen === 'PROJECTS' ? () => setShowNewProjectModal(true) : undefined} />
+      <Header onNewProject={currentScreen === 'PROJECTS' ? handleOpenCreateModal : undefined} />
 
       {/* Main Content */}
       <main className="main-content">
@@ -344,8 +352,9 @@ export default function Home() {
         {/* Screen: Projects Dashboard */}
         {currentScreen === 'PROJECTS' && (
           <ProjectsDashboard 
-            showCreateModal={showNewProjectModal} 
-            onCloseCreateModal={() => setShowNewProjectModal(false)} 
+            isCreateModalOpen={showCreateProjectModal} 
+            onOpenCreateModal={handleOpenCreateModal}
+            onCloseCreateModal={handleCloseCreateModal} 
           />
         )}
 
