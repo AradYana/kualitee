@@ -236,14 +236,14 @@ export default function ProjectSetupWizard({ project, onComplete, onCancel }: Pr
               </div>
 
               <div>
-                <label className="input-label">Site / Product Description *</label>
+                <label className="input-label">Prompt / Agent Context *</label>
                 <p className="text-sm text-slate-500 mb-2">
-                  Describe your site, product, or the context being evaluated. This helps the LLM understand the niche and provide relevant scores.
+                  Describe what your LLM prompt or AI agent is designed to do, its goal, and a summary of the logic. This context helps evaluate outputs more accurately.
                 </p>
                 <textarea
                   value={siteDescription}
                   onChange={(e) => setSiteDescription(e.target.value)}
-                  placeholder="e.g., An e-commerce platform selling outdoor camping gear. Target audience is adventure enthusiasts aged 25-45. The tone should be helpful and knowledgeable about outdoor activities."
+                  placeholder="e.g., A customer support chatbot that answers questions about software subscriptions. It should be helpful, accurate, and guide users to solutions. The agent retrieves FAQ data and generates contextual responses."
                   className="input-field resize-none"
                   rows={4}
                 />
