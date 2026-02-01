@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import ASCIIHeader from '@/components/ASCIIHeader';
 import FileUpload from '@/components/FileUpload';
 import KPIConfig from '@/components/KPIConfig';
 import LoadingIndicator from '@/components/LoadingIndicator';
@@ -10,6 +9,7 @@ import ResultsDisplay from '@/components/ResultsDisplay';
 import Terminal from '@/components/Terminal';
 import ProjectsDashboard from '@/components/ProjectsDashboard';
 import ProjectHub from '@/components/ProjectHub';
+import Header from '@/components/Header';
 import { useAppStore } from '@/lib/store';
 import { DataRow, ValidationError } from '@/lib/types';
 
@@ -320,174 +320,148 @@ export default function Home() {
   // Determine if we're in a test flow (Upload, KPI Config, Evaluating, Results)
   const isInTestFlow = ['UPLOAD', 'KPI_CONFIG', 'EVALUATING', 'RESULTS'].includes(currentScreen);
 
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+
   return (
-    <div className="min-h-screen py-6 px-4" style={{ backgroundColor: '#cec5b4' }}>
-      {/* Main Window */}
-      <div className="main-window max-w-5xl mx-auto">
-        {/* Title Bar */}
-        <div className="title-bar">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">🔷</span>
-            <span>Kualitee - Automated LLM QA System v1.0</span>
+    <div className="app-container min-h-screen">
+      {/* Header */}
+      <Header onNewProject={currentScreen === 'PROJECTS' ? () => setShowNewProjectModal(true) : undefined} />
+
+      {/* Main Content */}
+      <main className="main-content">
+        {/* Error Screen Overlay */}
+        {validationError && (
+          <ErrorScreen
+            error={validationError}
+            onDismiss={() => {
+              setValidationError(null);
+              setPhase('UPLOAD');
+              setScreen('UPLOAD');
+            }}
+          />
+        )}
+
+        {/* Screen: Projects Dashboard */}
+        {currentScreen === 'PROJECTS' && (
+          <ProjectsDashboard />
+        )}
+
+        {/* Screen: Project Hub */}
+        {currentScreen === 'PROJECT_HUB' && (
+          <ProjectHub />
+        )}
+
+        {/* Screen: Upload (within project test flow) */}
+        {currentScreen === 'UPLOAD' && (
+          <div className="animate-fade-in">
             {currentProject && (
-              <span className="text-xs opacity-75">
-                | {currentProject.name}
-              </span>
+              <button
+                onClick={() => setScreen('PROJECT_HUB')}
+                className="text-white/80 hover:text-white transition-colors mb-6 flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to {currentProject.name}
+              </button>
             )}
-          </div>
-          <div className="title-bar-controls">
-            <button className="title-bar-btn" title="Minimize">─</button>
-            <button className="title-bar-btn" title="Maximize">□</button>
-            {currentScreen !== 'PROJECTS' && (
-              <button className="title-bar-btn" onClick={handleReset} title="Close / Back">×</button>
-            )}
-          </div>
-        </div>
+            
+            <div className="card">
+              <div className="card-header">
+                <h2 className="text-xl font-semibold text-gray-900">Data Upload</h2>
+                <p className="text-sm text-gray-500 mt-1">Upload your source and target CSV files for evaluation</p>
+              </div>
+              <div className="card-body">
+                <p className="text-sm text-gray-500 mb-6 bg-blue-50 text-blue-700 px-4 py-3 rounded-lg">
+                  Both CSV files must include the <strong>MSID</strong> column as a unique identifier.
+                </p>
 
-        {/* Window Content */}
-        <div className="p-6" style={{ backgroundColor: '#e6e0d4' }}>
-          {/* Header */}
-          <ASCIIHeader />
+                <div className="grid md:grid-cols-2 gap-6">
+                  <FileUpload
+                    label="SOURCE_INPUT"
+                    onDataLoaded={(data) => {
+                      setSourceData(data);
+                      addLog('INFO', `SOURCE_INPUT loaded: ${data.length} records`);
+                    }}
+                    onError={handleUploadError}
+                  />
 
-          {/* Error Screen Overlay */}
-          {validationError && (
-            <ErrorScreen
-              error={validationError}
-              onDismiss={() => {
-                setValidationError(null);
-                setPhase('UPLOAD');
-                setScreen('UPLOAD');
-              }}
-            />
-          )}
-
-          {/* Main Content */}
-          <div className="space-y-6">
-            {/* Screen: Projects Dashboard */}
-            {currentScreen === 'PROJECTS' && (
-              <ProjectsDashboard />
-            )}
-
-            {/* Screen: Project Hub */}
-            {currentScreen === 'PROJECT_HUB' && (
-              <ProjectHub />
-            )}
-
-            {/* Screen: Upload (within project test flow) */}
-            {currentScreen === 'UPLOAD' && (
-              <div className="space-y-4">
-                {currentProject && (
-                  <button
-                    onClick={() => setScreen('PROJECT_HUB')}
-                    className="text-sm text-text-secondary hover:text-text-primary transition-colors"
-                  >
-                    ← Back to {currentProject.name}
-                  </button>
-                )}
-                
-                <div className="bevel-panel rounded-terminal p-5">
-                  <h2 className="text-lg font-semibold mb-4 text-text-primary">
-                    📁 Data Upload
-                  </h2>
-                  <p className="text-sm text-text-secondary mb-4">
-                    Both CSV files must include the MSID column.
-                  </p>
-
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <FileUpload
-                      label="SOURCE_INPUT"
-                      onDataLoaded={(data) => {
-                        setSourceData(data);
-                        addLog('INFO', `SOURCE_INPUT loaded: ${data.length} records`);
-                      }}
-                      onError={handleUploadError}
-                    />
-
-                    <FileUpload
-                      label="TARGET_OUTPUT"
-                      onDataLoaded={(data) => {
-                        setTargetData(data);
-                        addLog('INFO', `TARGET_OUTPUT loaded: ${data.length} records`);
-                      }}
-                      onError={handleUploadError}
-                    />
-                  </div>
-
-                  {sourceData && targetData && (
-                    <div className="text-center mt-6">
-                      <button onClick={validateAndMergeData} className="send-btn">
-                        Validate & Proceed
-                      </button>
-                    </div>
-                  )}
+                  <FileUpload
+                    label="TARGET_OUTPUT"
+                    onDataLoaded={(data) => {
+                      setTargetData(data);
+                      addLog('INFO', `TARGET_OUTPUT loaded: ${data.length} records`);
+                    }}
+                    onError={handleUploadError}
+                  />
                 </div>
-              </div>
-            )}
 
-            {/* Screen: KPI Config */}
-            {currentScreen === 'KPI_CONFIG' && (
-              <div className="space-y-4">
-                {currentProject && (
-                  <button
-                    onClick={() => setScreen('UPLOAD')}
-                    className="text-sm text-text-secondary hover:text-text-primary transition-colors"
-                  >
-                    ← Back to Upload
-                  </button>
-                )}
-                <KPIConfig onComplete={runEvaluation} />
-              </div>
-            )}
-
-            {/* Screen: Evaluating */}
-            {currentScreen === 'EVALUATING' && (
-              <LoadingIndicator message={loadingMessage} />
-            )}
-
-            {/* Screen: Results */}
-            {currentScreen === 'RESULTS' && (
-              <div className="space-y-4">
-                {currentProject && (
-                  <button
-                    onClick={() => setScreen('PROJECT_HUB')}
-                    className="text-sm text-text-secondary hover:text-text-primary transition-colors"
-                  >
-                    ← Back to {currentProject.name}
-                  </button>
-                )}
-                
-                {currentTestSet && (
-                  <div className="suggestion-chip inline-block mb-4">
-                    📊 Viewing: {currentTestSet.name}
+                {sourceData && targetData && (
+                  <div className="text-center mt-8">
+                    <button onClick={validateAndMergeData} className="btn-primary text-lg px-8 py-3">
+                      Validate & Proceed
+                    </button>
                   </div>
                 )}
-                
-                <ResultsDisplay filterFailures={showFailuresOnly} />
-                
-                <div className="mt-8">
-                  <div className="down-indicator mb-4">
-                    ▼ SCROLL DOWN FOR FEEDBACK TERMINAL ▼
-                  </div>
-                  <Terminal onCommand={handleTerminalQuery} isProcessing={isTerminalProcessing} />
-                </div>
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Status Bar */}
-        <div className="win95-statusbar flex justify-between">
-          <span>
-            {currentScreen === 'PROJECTS' && 'Select or create a project'}
-            {currentScreen === 'PROJECT_HUB' && `Project: ${currentProject?.name}`}
-            {currentScreen === 'UPLOAD' && 'Upload source and target CSV files'}
-            {currentScreen === 'KPI_CONFIG' && 'Configure evaluation criteria'}
-            {currentScreen === 'EVALUATING' && 'Evaluation in progress...'}
-            {currentScreen === 'RESULTS' && `${evaluationResults?.length || 0} records evaluated`}
-          </span>
-          <span>{new Date().toLocaleDateString()}</span>
-        </div>
-      </div>
+        {/* Screen: KPI Config */}
+        {currentScreen === 'KPI_CONFIG' && (
+          <div className="animate-fade-in">
+            {currentProject && (
+              <button
+                onClick={() => setScreen('UPLOAD')}
+                className="text-white/80 hover:text-white transition-colors mb-6 flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to Upload
+              </button>
+            )}
+            <KPIConfig onComplete={runEvaluation} />
+          </div>
+        )}
+
+        {/* Screen: Evaluating */}
+        {currentScreen === 'EVALUATING' && (
+          <div className="animate-fade-in">
+            <LoadingIndicator message={loadingMessage} />
+          </div>
+        )}
+
+        {/* Screen: Results */}
+        {currentScreen === 'RESULTS' && (
+          <div className="animate-fade-in">
+            {currentProject && (
+              <button
+                onClick={() => setScreen('PROJECT_HUB')}
+                className="text-white/80 hover:text-white transition-colors mb-6 flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to {currentProject.name}
+              </button>
+            )}
+            
+            {currentTestSet && (
+              <div className="badge badge-info mb-6">
+                📊 Viewing: {currentTestSet.name}
+              </div>
+            )}
+            
+            <ResultsDisplay filterFailures={showFailuresOnly} />
+            
+            <div className="mt-10">
+              <Terminal onCommand={handleTerminalQuery} isProcessing={isTerminalProcessing} />
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
