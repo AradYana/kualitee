@@ -162,8 +162,7 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">KPI</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Name</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">KPI Name</th>
                   <th className="text-center py-3 px-4 text-sm font-semibold text-gray-600">Mean</th>
                   <th className="text-center py-3 px-4 text-sm font-semibold text-gray-600">Median</th>
                   <th className="text-center py-3 px-4 text-sm font-semibold text-gray-600">Samples</th>
@@ -171,10 +170,14 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
                 </tr>
               </thead>
               <tbody>
-                {summaryStats.map((stat) => (
+                {summaryStats.map((stat, index) => (
                   <tr key={stat.kpiId} className="border-b border-gray-100">
-                    <td className="py-3 px-4 font-mono font-bold text-purple-600">[{stat.shortName}]</td>
-                    <td className="py-3 px-4 text-gray-900">{stat.kpiName}</td>
+                    <td className="py-3 px-4">
+                      <span className="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-1 rounded mr-2">
+                        KPI {index + 1}
+                      </span>
+                      <span className="text-gray-900 font-medium">{stat.kpiName}</span>
+                    </td>
                     <td className="py-3 px-4 text-center font-bold" style={{ color: getStatusColor(stat.mean) }}>{stat.mean.toFixed(2)}</td>
                     <td className="py-3 px-4 text-center font-bold" style={{ color: getStatusColor(stat.median) }}>{stat.median.toFixed(2)}</td>
                     <td className="py-3 px-4 text-center text-gray-600">{stat.count}</td>
@@ -209,7 +212,7 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">MSID</th>
                     {activeKPIs.map((kpi) => (
                       <th key={kpi.id} className="text-center py-3 px-4 text-sm font-semibold text-gray-600">
-                        {kpi.shortName || `KPI_${kpi.id}`}
+                        {kpi.name}
                       </th>
                     ))}
                   </tr>
@@ -253,7 +256,7 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
                     const scoreData = result.scores[kpiKey];
                     return (
                       <div key={kpi.id} className="ml-3 text-gray-600 text-sm">
-                        [{kpiKey}] Score: {scoreData?.score || '-'} — {scoreData?.justification || 'N/A'}
+                        <span className="font-medium text-slate-700">{kpi.name}:</span> Score: {scoreData?.score || '-'} — {scoreData?.justification || 'N/A'}
                       </div>
                     );
                   })}

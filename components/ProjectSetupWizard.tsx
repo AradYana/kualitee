@@ -210,7 +210,7 @@ export default function ProjectSetupWizard({ project, onComplete, onCancel }: Pr
 
             <div className="bg-slate-50 rounded-xl p-5 space-y-4 border border-slate-100">
               <div className="text-sm font-semibold text-slate-800">
-                KPI #{currentKPIIndex + 1} {currentKPI.shortName && <span className="text-purple-600">[{currentKPI.shortName}]</span>}
+                KPI #{currentKPIIndex + 1}
               </div>
 
               <div>

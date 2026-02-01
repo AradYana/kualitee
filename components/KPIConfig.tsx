@@ -87,7 +87,7 @@ export default function KPIConfig({ onComplete }: KPIConfigProps) {
   const handleConfirm = () => {
     if (!validateCurrentKPI()) return;
 
-    addLog('INFO', `KPI ${currentKPI.id}: ${currentKPI.name} [${currentKPI.shortName}] configured`);
+    addLog('INFO', `KPI ${currentKPI.id}: ${currentKPI.name} configured`);
 
     if (isLastKPI) {
       // Set completing state FIRST to prevent re-render issues
@@ -157,7 +157,7 @@ export default function KPIConfig({ onComplete }: KPIConfigProps) {
               {prefilledKPIs.map((kpi) => (
                 <div key={kpi.id} className="inline-flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-purple-200">
                   <span className="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-0.5 rounded">
-                    {kpi.shortName}
+                    KPI {kpi.id}
                   </span>
                   <span className="text-sm text-slate-700">{kpi.name}</span>
                 </div>
@@ -205,11 +205,6 @@ export default function KPIConfig({ onComplete }: KPIConfigProps) {
         <div className="bg-slate-50 rounded-xl p-5 border border-slate-100 mb-6">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-sm font-semibold text-slate-800">KPI #{currentKPI.id}</span>
-            {currentKPI.shortName && (
-              <span className="text-xs font-medium text-purple-600 bg-purple-100 px-2 py-0.5 rounded">
-                {currentKPI.shortName}
-              </span>
-            )}
           </div>
 
           <div className="space-y-4">
@@ -274,7 +269,6 @@ export default function KPIConfig({ onComplete }: KPIConfigProps) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     <span className="text-sm text-slate-700">{kpi.name}</span>
-                    <span className="text-xs text-green-600 font-medium">[{kpi.shortName}]</span>
                   </div>
                 )
               ))}

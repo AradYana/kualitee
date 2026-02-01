@@ -471,7 +471,7 @@ export default function ProjectHub() {
             {editedKPIs.map((kpi, index) => (
               <div key={index} className="bg-slate-50 rounded-xl p-5">
                 <div className="text-sm font-semibold text-slate-700 mb-3">
-                  KPI {index + 1} {kpi.shortName && <span className="text-purple-600">[{kpi.shortName}]</span>}
+                  KPI {index + 1}
                 </div>
                 <div className="space-y-3">
                   <input
@@ -511,7 +511,7 @@ export default function ProjectHub() {
                   <div key={kpi.id} className="bg-slate-50 rounded-xl p-5 border border-slate-100">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-1 rounded">
-                        {kpi.shortName}
+                        KPI {kpi.kpiNumber || kpi.id}
                       </span>
                       <span className="font-semibold text-slate-800">{kpi.name}</span>
                     </div>
