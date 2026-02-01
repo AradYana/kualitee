@@ -102,10 +102,10 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
   }
 
   const getStatusColor = (score: number) => {
-    if (score >= 4.5) return '#16A34A';
-    if (score >= 3.5) return '#22C55E';
-    if (score >= 2.5) return '#F59E0B';
-    return '#DC2626';
+    if (score >= 4.5) return '#15803D'; // Green-700 - darker for better contrast
+    if (score >= 3.5) return '#16A34A'; // Green-600
+    if (score >= 2.5) return '#B45309'; // Amber-700 - darker for better contrast
+    return '#B91C1C'; // Red-700 - darker for better contrast
   };
 
   const getStatusText = (score: number) => {

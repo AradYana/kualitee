@@ -10,7 +10,7 @@ html, body {
   min-height: 100vh;
   background: linear-gradient(135deg, #6B46C1 0%, #63B3ED 100%);
   font-family: 'Inter', 'Plus Jakarta Sans', system-ui, sans-serif;
-  color: #1A202C;
+  color: #1E293B;
 }
 
 /* Main App Container */
@@ -30,7 +30,7 @@ html, body {
   position: sticky;
   top: 0;
   z-index: 50;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .header-logo {
@@ -55,7 +55,7 @@ html, body {
 .header-logo-text {
   font-weight: 700;
   font-size: 22px;
-  color: #1A202C;
+  color: #0F172A;
 }
 
 .header-divider {
@@ -67,7 +67,7 @@ html, body {
 
 .header-subtitle {
   font-size: 12px;
-  color: #A0AEC0;
+  color: #64748B;
   font-weight: 500;
 }
 
@@ -80,11 +80,12 @@ html, body {
 
 .search-input {
   width: 100%;
-  background-color: #F7FAFC;
+  background-color: #F8FAFC;
   border: 1px solid #E2E8F0;
   border-radius: 9999px;
   padding: 12px 20px 12px 48px;
   font-size: 14px;
+  color: #1E293B;
   outline: none;
   transition: all 0.2s ease;
 }
@@ -92,11 +93,11 @@ html, body {
 .search-input:focus {
   background-color: #FFFFFF;
   border-color: #6B46C1;
-  box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1);
+  box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.15);
 }
 
 .search-input::placeholder {
-  color: #A0AEC0;
+  color: #94A3B8;
 }
 
 /* Header Actions */
@@ -108,7 +109,7 @@ html, body {
 
 /* Primary Button */
 .btn-primary {
-  background-color: #6B46C1;
+  background: linear-gradient(135deg, #7C3AED 0%, #6B46C1 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -117,16 +118,16 @@ html, body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(107, 70, 193, 0.25);
+  box-shadow: 0 4px 12px rgba(107, 70, 193, 0.3);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .btn-primary:hover {
-  background-color: #553C9A;
+  background: linear-gradient(135deg, #6D28D9 0%, #5B21B6 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(107, 70, 193, 0.35);
+  box-shadow: 0 6px 16px rgba(107, 70, 193, 0.4);
 }
 
 .btn-primary:active {
@@ -134,7 +135,7 @@ html, body {
 }
 
 .btn-primary:disabled {
-  background-color: #A0AEC0;
+  background: #94A3B8;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -142,8 +143,8 @@ html, body {
 
 /* Secondary Button */
 .btn-secondary {
-  background-color: #EDF2F7;
-  color: #4A5568;
+  background-color: #F1F5F9;
+  color: #475569;
   border: none;
   border-radius: 12px;
   padding: 12px 24px;
@@ -151,29 +152,33 @@ html, body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .btn-secondary:hover {
   background-color: #E2E8F0;
+  color: #334155;
 }
 
 /* Card Component */
 .card {
   background-color: #FFFFFF;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   overflow: hidden;
   transition: all 0.3s ease;
 }
 
 .card:hover {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
 }
 
 .card-header {
   padding: 20px 24px;
-  border-bottom: 1px solid #EDF2F7;
+  border-bottom: 1px solid #F1F5F9;
 }
 
 .card-body {
@@ -182,15 +187,15 @@ html, body {
 
 .card-footer {
   padding: 16px 24px;
-  background-color: #F7FAFC;
-  border-top: 1px solid #EDF2F7;
+  background-color: #F8FAFC;
+  border-top: 1px solid #F1F5F9;
 }
 
 /* Project Card */
 .project-card {
   background-color: #FFFFFF;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   padding: 28px;
   transition: all 0.3s ease;
   cursor: pointer;
@@ -199,20 +204,20 @@ html, body {
 }
 
 .project-card:hover {
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
   transform: translateY(-4px);
 }
 
 .project-card-title {
   font-size: 18px;
   font-weight: 600;
-  color: #1A202C;
+  color: #0F172A;
   margin-bottom: 4px;
 }
 
 .project-card-date {
   font-size: 13px;
-  color: #A0AEC0;
+  color: #64748B;
   margin-bottom: 24px;
 }
 
@@ -224,7 +229,7 @@ html, body {
 .score-value {
   font-size: 48px;
   font-weight: 700;
-  background: linear-gradient(135deg, #667EEA 0%, #6B46C1 100%);
+  background: linear-gradient(135deg, #6366F1 0%, #7C3AED 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -233,14 +238,15 @@ html, body {
 
 .score-max {
   font-size: 24px;
-  color: #A0AEC0;
+  color: #64748B;
   font-weight: 500;
 }
 
 .score-label {
   font-size: 13px;
-  color: #718096;
+  color: #64748B;
   margin-top: 4px;
+  font-weight: 500;
 }
 
 /* KPI Progress Bars */
@@ -265,26 +271,26 @@ html, body {
 
 .kpi-label {
   font-size: 13px;
-  color: #718096;
+  color: #475569;
   font-weight: 500;
 }
 
 .kpi-value {
   font-size: 13px;
-  color: #1A202C;
-  font-weight: 600;
+  color: #0F172A;
+  font-weight: 700;
 }
 
 .kpi-bar {
   height: 8px;
-  background-color: #EDF2F7;
+  background-color: #E2E8F0;
   border-radius: 4px;
   overflow: hidden;
 }
 
 .kpi-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #667EEA 0%, #63B3ED 100%);
+  background: linear-gradient(90deg, #6366F1 0%, #8B5CF6 100%);
   border-radius: 4px;
   transition: width 0.5s ease;
 }
@@ -292,8 +298,8 @@ html, body {
 /* View Dashboard Button */
 .btn-view-dashboard {
   width: 100%;
-  background-color: #EBF4FF;
-  color: #5A67D8;
+  background-color: #EEF2FF;
+  color: #4F46E5;
   border: none;
   border-radius: 12px;
   padding: 14px 20px;
@@ -305,8 +311,8 @@ html, body {
 }
 
 .btn-view-dashboard:hover {
-  background-color: #C3DAFE;
-  color: #4C51BF;
+  background-color: #E0E7FF;
+  color: #4338CA;
 }
 
 /* Main Content Area */
@@ -326,7 +332,7 @@ html, body {
 
 .page-subtitle {
   font-size: 15px;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.85);
   margin-bottom: 32px;
 }
 
@@ -340,23 +346,23 @@ html, body {
 /* Input Styles */
 .input-field {
   width: 100%;
-  background-color: #F7FAFC;
+  background-color: #FFFFFF;
   border: 1px solid #E2E8F0;
   border-radius: 10px;
   padding: 14px 18px;
   font-size: 14px;
+  color: #1E293B;
   outline: none;
   transition: all 0.2s ease;
 }
 
 .input-field:focus {
-  background-color: #FFFFFF;
-  border-color: #6B46C1;
-  box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1);
+  border-color: #7C3AED;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
 }
 
 .input-field::placeholder {
-  color: #A0AEC0;
+  color: #94A3B8;
 }
 
 /* Labels */
@@ -364,11 +370,11 @@ html, body {
   display: block;
   font-size: 14px;
   font-weight: 600;
-  color: #1A202C;
+  color: #1E293B;
   margin-bottom: 8px;
 }
 
-/* Status Badge */
+/* Status Badge - IMPROVED CONTRAST */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -379,30 +385,30 @@ html, body {
 }
 
 .badge-success {
-  background-color: #C6F6D5;
-  color: #22543D;
+  background-color: #DCFCE7;
+  color: #166534;
 }
 
 .badge-warning {
-  background-color: #FEEBC8;
-  color: #744210;
+  background-color: #FEF3C7;
+  color: #92400E;
 }
 
 .badge-error {
-  background-color: #FED7D7;
-  color: #822727;
+  background-color: #FEE2E2;
+  color: #991B1B;
 }
 
 .badge-info {
-  background-color: #BEE3F8;
-  color: #2A4365;
+  background-color: #DBEAFE;
+  color: #1E40AF;
 }
 
 /* Notification Bell */
 .notification-btn {
   width: 44px;
   height: 44px;
-  background-color: #F7FAFC;
+  background-color: #F8FAFC;
   border: none;
   border-radius: 12px;
   display: flex;
@@ -410,13 +416,13 @@ html, body {
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #718096;
+  color: #64748B;
   font-size: 20px;
 }
 
 .notification-btn:hover {
-  background-color: #EDF2F7;
-  color: #4A5568;
+  background-color: #F1F5F9;
+  color: #475569;
 }
 
 /* User Avatar */
@@ -424,7 +430,7 @@ html, body {
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #667EEA 0%, #6B46C1 100%);
+  background: linear-gradient(135deg, #6366F1 0%, #7C3AED 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -445,7 +451,7 @@ html, body {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(15, 23, 42, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -460,7 +466,7 @@ html, body {
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
 }
 
 /* Progress Steps */
@@ -485,29 +491,29 @@ html, body {
 }
 
 .progress-step.completed {
-  background-color: #48BB78;
+  background-color: #22C55E;
   color: white;
 }
 
 .progress-step.active {
-  background-color: #6B46C1;
+  background-color: #7C3AED;
   color: white;
 }
 
 .progress-step.pending {
-  background-color: #E2E8F0;
-  color: #A0AEC0;
+  background-color: #F1F5F9;
+  color: #94A3B8;
 }
 
 .progress-connector {
   width: 40px;
   height: 3px;
-  background-color: #E2E8F0;
+  background-color: #F1F5F9;
   border-radius: 2px;
 }
 
 .progress-connector.completed {
-  background-color: #48BB78;
+  background-color: #22C55E;
 }
 
 /* Empty State */
@@ -519,19 +525,18 @@ html, body {
 .empty-state-icon {
   font-size: 64px;
   margin-bottom: 20px;
-  opacity: 0.5;
 }
 
 .empty-state-title {
   font-size: 20px;
   font-weight: 600;
-  color: #1A202C;
+  color: #1E293B;
   margin-bottom: 8px;
 }
 
 .empty-state-text {
   font-size: 15px;
-  color: #718096;
+  color: #64748B;
   max-width: 400px;
   margin: 0 auto;
 }
@@ -543,22 +548,22 @@ html, body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #F7FAFC;
+  background: #F8FAFC;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E0;
+  background: #CBD5E1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #A0AEC0;
+  background: #94A3B8;
 }
 
 /* Selection */
 ::selection {
-  background: #6B46C1;
+  background: #7C3AED;
   color: #FFFFFF;
 }
 
@@ -578,7 +583,7 @@ html, body {
   justify-content: space-between;
   align-items: center;
   padding: 20px 0;
-  border-top: 1px solid #EDF2F7;
+  border-top: 1px solid #F1F5F9;
   margin-top: 24px;
 }
 
@@ -591,7 +596,7 @@ html, body {
   align-items: center;
   justify-content: space-between;
   margin-top: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
 
 /* Pagination */
@@ -604,7 +609,7 @@ html, body {
 .pagination-btn {
   width: 36px;
   height: 36px;
-  background-color: #F7FAFC;
+  background-color: #FFFFFF;
   border: 1px solid #E2E8F0;
   border-radius: 8px;
   display: flex;
@@ -612,23 +617,24 @@ html, body {
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #718096;
+  color: #64748B;
 }
 
 .pagination-btn:hover {
-  background-color: #EDF2F7;
-  border-color: #CBD5E0;
+  background-color: #F8FAFC;
+  border-color: #CBD5E1;
+  color: #475569;
 }
 
 .pagination-btn.active {
-  background-color: #6B46C1;
-  border-color: #6B46C1;
+  background-color: #7C3AED;
+  border-color: #7C3AED;
   color: white;
 }
 
 .pagination-text {
   font-size: 14px;
-  color: #718096;
+  color: #64748B;
   margin: 0 16px;
 }
 
@@ -650,5 +656,62 @@ html, body {
 }
 
 .suggestion-chip {
-  @apply badge badge-info cursor-pointer hover:bg-blue-200 transition-colors;
+  background-color: #EEF2FF;
+  color: #4F46E5;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.suggestion-chip:hover {
+  background-color: #E0E7FF;
+  color: #4338CA;
+}
+
+/* Table styles for better readability */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748B;
+  border-bottom: 1px solid #E2E8F0;
+  background-color: #F8FAFC;
+}
+
+table td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #1E293B;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+table tr:hover td {
+  background-color: #F8FAFC;
+}
+
+/* Text color utilities for consistency */
+.text-heading {
+  color: #0F172A;
+}
+
+.text-body {
+  color: #1E293B;
+}
+
+.text-muted {
+  color: #64748B;
+}
+
+.text-light {
+  color: #94A3B8;
 }

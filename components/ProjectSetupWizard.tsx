@@ -172,16 +172,19 @@ export default function ProjectSetupWizard({ project, onComplete, onCancel }: Pr
   };
 
   return (
-    <div className="card overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600">
+      <div className="px-6 py-5 border-b border-slate-100">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-            <span>🚀</span> Project Setup Wizard - {getStepTitle()}
-          </h2>
+          <div>
+            <h2 className="text-xl font-bold text-slate-800">
+              {getStepTitle()}
+            </h2>
+            <p className="text-sm text-slate-500 mt-1">Step {getStepNumber()} of 5</p>
+          </div>
           <button 
             onClick={onCancel} 
-            className="text-white/80 hover:text-white transition-colors"
+            className="text-slate-400 hover:text-slate-600 transition-colors p-2 hover:bg-slate-100 rounded-lg"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -216,7 +219,7 @@ export default function ProjectSetupWizard({ project, onComplete, onCancel }: Pr
         {/* Step: Project Context */}
         {currentStep === 'CONTEXT' && (
           <div className="space-y-6">
-            <p className="text-gray-600">
+            <p className="text-slate-600">
               Tell us about your project so the LLM can provide more accurate evaluations.
             </p>
 
@@ -234,7 +237,7 @@ export default function ProjectSetupWizard({ project, onComplete, onCancel }: Pr
 
               <div>
                 <label className="input-label">Site / Product Description *</label>
-                <p className="text-sm text-gray-500 mb-2">
+                <p className="text-sm text-slate-500 mb-2">
                   Describe your site, product, or the context being evaluated. This helps the LLM understand the niche and provide relevant scores.
                 </p>
                 <textarea
@@ -267,20 +270,20 @@ export default function ProjectSetupWizard({ project, onComplete, onCancel }: Pr
         {/* Steps: KPI Configuration */}
         {currentKPI && (
           <div className="space-y-6">
-            <p className="text-gray-600">
+            <p className="text-slate-600">
               Define Key Performance Indicators for evaluation. Describe what constitutes "Good" vs "Bad" for each metric.
               <br />
-              <span className="font-semibold text-gray-800">Minimum 1 KPI required.</span> You can configure up to 4.
+              <span className="font-semibold text-slate-800">Minimum 1 KPI required.</span> You can configure up to 4.
             </p>
 
-            <div className="badge badge-info">
+            <div className="inline-flex items-center px-3 py-1.5 rounded-lg bg-purple-100 text-purple-700 text-sm font-medium">
               KPI {currentKPIIndex + 1} of 4 
               {configuredKPICount > 0 && ` (${configuredKPICount} configured)`}
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-5 space-y-4">
-              <div className="text-sm font-semibold text-gray-800">
-                KPI #{currentKPIIndex + 1} {currentKPI.shortName && `[${currentKPI.shortName}]`}
+            <div className="bg-slate-50 rounded-xl p-5 space-y-4 border border-slate-100">
+              <div className="text-sm font-semibold text-slate-800">
+                KPI #{currentKPIIndex + 1} {currentKPI.shortName && <span className="text-purple-600">[{currentKPI.shortName}]</span>}
               </div>
 
               <div>
@@ -308,8 +311,8 @@ export default function ProjectSetupWizard({ project, onComplete, onCancel }: Pr
 
             {/* Previously configured KPIs */}
             {currentKPIIndex > 0 && configuredKPICount > 0 && (
-              <p className="text-sm text-gray-500">
-                <span className="font-semibold">Configured:</span>{' '}
+              <p className="text-sm text-slate-500">
+                <span className="font-semibold text-slate-700">Configured:</span>{' '}
                 {kpis.slice(0, currentKPIIndex).filter(k => k.name.trim()).map(k => k.shortName || k.name).join(', ')}
               </p>
             )}
