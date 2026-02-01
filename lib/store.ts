@@ -8,8 +8,8 @@ interface AppStore extends AppState {
   setScreen: (screen: AppState['currentScreen']) => void;
   
   // Data actions
-  setSourceData: (data: DataRow[]) => void;
-  setTargetData: (data: DataRow[]) => void;
+  setSourceData: (data: DataRow[] | null) => void;
+  setTargetData: (data: DataRow[] | null) => void;
   setMergedData: (data: { source: DataRow; target: DataRow }[]) => void;
   clearData: () => void;
   clearTestFlow: () => void;
