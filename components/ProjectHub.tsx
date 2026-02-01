@@ -27,6 +27,11 @@ export default function ProjectHub() {
   const [error, setError] = useState<string | null>(null);
   const [showSetupWizard, setShowSetupWizard] = useState(false);
   
+  // Edit Settings state (name & description only)
+  const [isEditingSettings, setIsEditingSettings] = useState(false);
+  const [editedName, setEditedName] = useState('');
+  const [editedDescription, setEditedDescription] = useState('');
+  
   // Determine if project needs setup (no KPIs configured)
   const needsSetup = projectDetail && (!projectDetail.isConfigured || !projectDetail.kpis || projectDetail.kpis.length === 0);
 
@@ -47,6 +52,10 @@ export default function ProjectHub() {
       const data = await res.json();
       setProjectDetail(data.project);
       
+      // Initialize edited name and description
+      setEditedName(data.project.name || '');
+      setEditedDescription(data.project.siteDescription || '');
+      
       // Initialize edited KPIs
       if (data.project.kpis) {
         const kpis = data.project.kpis.map((k: any) => ({
@@ -66,6 +75,42 @@ export default function ProjectHub() {
       setError('Failed to load project details');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    if (!currentProject?.id) return;
+    
+    if (!editedName.trim()) {
+      setError('Project name is required');
+      return;
+    }
+    if (!editedDescription.trim()) {
+      setError('Prompt/Agent context is required');
+      return;
+    }
+    
+    try {
+      const res = await fetch(`/api/projects/${currentProject.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editedName.trim(),
+          siteDescription: editedDescription.trim(),
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to update settings');
+      
+      addLog('SUCCESS', 'Project settings updated');
+      setIsEditingSettings(false);
+      setError(null);
+      await fetchProjectDetail();
+      // Update the current project in store
+      setCurrentProject({ ...currentProject, name: editedName.trim() });
+    } catch (err) {
+      console.error('Error updating settings:', err);
+      setError('Failed to update settings');
     }
   };
 
@@ -316,7 +361,7 @@ export default function ProjectHub() {
               Run New Test
             </button>
             <button
-              onClick={() => setShowSetupWizard(true)}
+              onClick={() => setIsEditingSettings(true)}
               className="btn-secondary"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -328,6 +373,75 @@ export default function ProjectHub() {
           </div>
         </div>
       </div>
+
+      {/* Edit Settings Modal */}
+      {isEditingSettings && (
+        <div className="modal-overlay" onClick={() => setIsEditingSettings(false)}>
+          <div className="modal-content p-8" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Edit Project Settings</h2>
+              <button 
+                onClick={() => setIsEditingSettings(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors p-2 hover:bg-slate-100 rounded-lg"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-5">
+              <div>
+                <label className="input-label">Project Name *</label>
+                <input
+                  type="text"
+                  value={editedName}
+                  onChange={(e) => setEditedName(e.target.value)}
+                  placeholder="e.g., Customer Support Bot Evaluation"
+                  className="input-field"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="input-label">Prompt / Agent Context *</label>
+                <p className="text-sm text-slate-500 mb-2">
+                  Describe what your LLM prompt or AI agent is designed to do.
+                </p>
+                <textarea
+                  value={editedDescription}
+                  onChange={(e) => setEditedDescription(e.target.value)}
+                  placeholder="e.g., A customer support chatbot that answers questions about software subscriptions."
+                  className="input-field resize-none"
+                  rows={4}
+                />
+              </div>
+              
+              {error && (
+                <div className="badge badge-error w-full justify-center py-3">
+                  ⚠️ {error}
+                </div>
+              )}
+              
+              <div className="flex gap-3 pt-2">
+                <button onClick={handleSaveSettings} className="btn-primary flex-1">
+                  Save Changes
+                </button>
+                <button
+                  onClick={() => {
+                    setIsEditingSettings(false);
+                    setEditedName(projectDetail?.name || '');
+                    setEditedDescription(projectDetail?.siteDescription || '');
+                    setError(null);
+                  }}
+                  className="btn-secondary flex-1"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Section: Project KPIs */}
       <div className="bg-white rounded-2xl shadow-sm p-6">
