@@ -67,8 +67,8 @@ export default function Home() {
     const sourceMSIDs = new Set(sourceData.map((row) => row.MSID));
     const targetMSIDs = new Set(targetData.map((row) => row.MSID));
 
-    const missingInTarget = [...sourceMSIDs].filter((id) => !targetMSIDs.has(id));
-    const missingInSource = [...targetMSIDs].filter((id) => !sourceMSIDs.has(id));
+    const missingInTarget = Array.from(sourceMSIDs).filter((id) => !targetMSIDs.has(id));
+    const missingInSource = Array.from(targetMSIDs).filter((id) => !sourceMSIDs.has(id));
 
     if (missingInTarget.length > 0 || missingInSource.length > 0) {
       const error: ValidationError = {
