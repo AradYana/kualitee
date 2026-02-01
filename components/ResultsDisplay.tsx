@@ -11,11 +11,14 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
   const { evaluationResults, kpis, dataMismatchLog, currentTestSet } = useAppStore();
   
   // Use KPIs from test set if available (for historical views), otherwise use current
+  // Filter to only include KPIs that are actually configured (have a name)
   const activeKPIs = useMemo(() => {
+    let kpiSource = kpis;
     if (currentTestSet?.kpis && currentTestSet.kpis.length > 0) {
-      return currentTestSet.kpis;
+      kpiSource = currentTestSet.kpis;
     }
-    return kpis;
+    // Only include KPIs that have a name (are actually configured)
+    return kpiSource.filter(k => k.name && k.name.trim().length > 0);
   }, [currentTestSet, kpis]);
 
   // Use data mismatches from test set if available
@@ -32,23 +35,26 @@ export default function ResultsDisplay({ filterFailures = false }: ResultsDispla
   const summaryStats = useMemo(() => {
     if (!evaluationResults || evaluationResults.length === 0) return [];
 
-    return activeKPIs.map((kpi) => {
-      const scores = evaluationResults
-        .flatMap((r) => r.scores.filter((s: any) => s.kpiId === kpi.id))
-        .map((s: any) => s.score)
-        .filter((s: number) => s > 0);
+    return activeKPIs
+      .map((kpi) => {
+        const scores = evaluationResults
+          .flatMap((r) => r.scores.filter((s: any) => s.kpiId === kpi.id))
+          .map((s: any) => s.score)
+          .filter((s: number) => s > 0);
 
-      if (scores.length === 0) {
-        return { kpiId: kpi.id, kpiName: kpi.name, shortName: kpi.shortName, mean: 0, median: 0, count: 0 };
-      }
+        if (scores.length === 0) {
+          return { kpiId: kpi.id, kpiName: kpi.name, shortName: kpi.shortName, mean: 0, median: 0, count: 0 };
+        }
 
-      const mean = scores.reduce((a: number, b: number) => a + b, 0) / scores.length;
-      const sorted = [...scores].sort((a, b) => a - b);
-      const mid = Math.floor(sorted.length / 2);
-      const median = sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+        const mean = scores.reduce((a: number, b: number) => a + b, 0) / scores.length;
+        const sorted = [...scores].sort((a, b) => a - b);
+        const mid = Math.floor(sorted.length / 2);
+        const median = sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 
-      return { kpiId: kpi.id, kpiName: kpi.name, shortName: kpi.shortName, mean, median, count: scores.length };
-    });
+        return { kpiId: kpi.id, kpiName: kpi.name, shortName: kpi.shortName, mean, median, count: scores.length };
+      })
+      // Only include KPIs that have actual results
+      .filter(stat => stat.count > 0);
   }, [evaluationResults, activeKPIs]);
 
   const detailedResults = useMemo(() => {
