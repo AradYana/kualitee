@@ -59,17 +59,16 @@ export default function KPIConfig({ onComplete }: KPIConfigProps) {
 
   const handleNameChange = (name: string) => {
     updateKPI(currentKPI.id, { name });
+    // Auto-generate short name from the KPI name
+    if (name.length > 0) {
+      const shortName = name.trim().toUpperCase().slice(0, 10) || 'KPI' + currentKPI.id;
+      updateKPI(currentKPI.id, { shortName });
+    }
     if (error) setError(null);
   };
 
   const handleDescriptionChange = (description: string) => {
     updateKPI(currentKPI.id, { description });
-    
-    if (description.length > 0) {
-      const words = description.split(' ').filter(w => w.length > 3);
-      const shortName = words[0]?.toUpperCase().slice(0, 10) || 'KPI' + currentKPI.id;
-      updateKPI(currentKPI.id, { shortName });
-    }
     if (error) setError(null);
   };
 

@@ -160,10 +160,9 @@ export default function ProjectHub() {
     setEditedKPIs(prev => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
-      // Auto-generate short name
-      if (field === 'description' && value.length > 0) {
-        const words = value.split(' ').filter(w => w.length > 3);
-        updated[index].shortName = words[0]?.toUpperCase().slice(0, 10) || `KPI${index + 1}`;
+      // Auto-generate short name from the KPI name (not description)
+      if (field === 'name' && value.length > 0) {
+        updated[index].shortName = value.trim().toUpperCase().slice(0, 10) || `KPI${index + 1}`;
       }
       return updated;
     });
